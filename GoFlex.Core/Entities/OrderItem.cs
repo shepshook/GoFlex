@@ -6,7 +6,6 @@
         public int EventPriceId { get; set; }
         public int Quantity { get; set; }
 
-        public Order Order { get; set; }
         public EventPrice EventPrice { get; set; }
     }
 }
