@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace GoFlex.Core.Entities
 {
@@ -16,5 +17,6 @@ namespace GoFlex.Core.Entities
         public EventCategory EventCategory { get; set; }
         public Location Location { get; set; }
         public User Organizer { get; set; }
+        public ICollection<EventPrice> Prices { get; set; }
     }
 }

@@ -12,8 +12,8 @@ namespace GoFlex.Core.Entities
 
         public User User { get; set; }
         public Event Event { get; set; }
-        public ICollection<OrderItem> OrderItems { get; set; }
+        public ICollection<OrderItem> Items { get; set; }
 
-        public decimal TotalPrice => OrderItems.Sum(x => x.EventPrice.Price * x.Quantity);
+        public decimal TotalPrice => Items.Sum(x => x.EventPrice.Price * x.Quantity);
     }
 }
