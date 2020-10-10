@@ -1,0 +1,56 @@
+﻿@model Event
+
+@{
+    Layout = "_MainLayout";
+}
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <img class="w-100 h-auto" src="@Model.Photo" />
+    </div>
+    <div class="col-md-8">
+        <h3 class="mb-3">@Model.Name</h3>
+        <span>@Model.ShortDateTime. At <a asp-controller="Location" asp-action="Details" asp-route-id="@Model.LocationId">@Model.Location.Name</a></span>
+        <p class="lead">@Model.Description</p>
+    </div>
+</div>
+<form method="get" asp-controller="Order" asp-action="Payment">
+    <table class="table table-hover" id="pricesTable">
+        @{
+            var counter = 0;
+            foreach (var price in Model.Prices)
+            {
+                <tr>
+                    <input type="hidden" name="id[@(counter)]" value="@price.Id"/>
+                    <input type="hidden" id="price@(counter)" value="@price.Price"/>
+                    <td>@price.Name</td>
+                    <td>@price.FormattedPrice</td>
+                    <td style="width: 15%">
+                        <input type="number" id="counter@(counter)" name="count[@(counter++)]" min="0" class="form-control" value="0" onchange="javascript: countTotalPrice();"/>
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+    <div class="d-flex flex-row justify-content-end">
+        <span class="lead mr-3" id="totalPriceLabel">Total: 0 BYN</span>
+        <input type="submit" class="btn btn-success" value="To payment"/>
+    </div>
+</form>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        function countTotalPrice() {
+            var table = document.getElementById("pricesTable");
+            var sum = 0;
+            var rowsNum = table.childNodes[1].rows.length;
+            for (var i = 0; i < rowsNum; i++) {
+                var price = document.getElementById("price" + i);
+                var counter = document.getElementById("counter" + i);
+                sum += price.value * counter.value;
+            }
+            document.getElementById("totalPriceLabel").innerHTML = "Total: " + sum.toFixed(2) + " BYN";
+        }
+    </script>
+}

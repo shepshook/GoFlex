@@ -1,0 +1,20 @@
+﻿@model IEnumerable<Location>
+
+@{
+    Layout = "_MainLayout";
+}
+
+@foreach (var location in Model)
+{
+    <div class="jumbotron d-flex flex-row" style="background-color: #fafafa">
+        <div class="col-md-3">
+            <img class="w-100 h-auto" src="@location.Photo"/>
+        </div>
+        <div class="col-md-9">
+            <h3>@location.Name</h3>
+            <p>@location.City.Name</p>
+            <p>@location.Address</p>
+            <p>@location.PhoneNumber</p>
+        </div>
+    </div>
+}

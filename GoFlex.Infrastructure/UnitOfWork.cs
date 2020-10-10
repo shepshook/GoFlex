@@ -14,6 +14,7 @@ namespace GoFlex.Infrastructure
         private IOrderRepository _orderRepository;
         private IRoleRepository _roleRepository;
         private IUserRepository _userRepository;
+        private ICityRepository _cityRepository;
 
         private bool _isDisposed;
 
@@ -26,6 +27,7 @@ namespace GoFlex.Infrastructure
         public IOrderRepository OrderRepository => _orderRepository ??= new OrderRepository(Context);
         public IRoleRepository RoleRepository => _roleRepository ??= new RoleRepository(Context);
         public IUserRepository UserRepository => _userRepository ??= new UserRepository(Context);
+        public ICityRepository CityRepository => _cityRepository ??= new CityRepository(Context);
 
         public UnitOfWork()
         {

@@ -16,9 +16,11 @@ namespace GoFlex.Infrastructure.Mappings
             Property(x => x.Name).IsRequired().HasMaxLength(128);
             Property(x => x.Description).IsOptional().HasMaxLength(1024);
             Property(x => x.DateTime).IsRequired();
-            Property(x => x.Poster).IsOptional();
+            Property(x => x.Photo).IsOptional();
 
             HasRequired(x => x.EventCategory).WithMany().HasForeignKey(x => x.EventCategoryId);
+            HasRequired(x => x.Organizer).WithMany().HasForeignKey(x => x.OrganizerId);
+            HasRequired(x => x.Location).WithMany().HasForeignKey(x => x.LocationId);
             HasMany(e => e.Prices).WithRequired(price => price.Event).HasForeignKey(price => price.EventId);
         }
     }

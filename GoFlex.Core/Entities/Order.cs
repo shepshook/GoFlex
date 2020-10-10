@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace GoFlex.Core.Entities
@@ -10,9 +11,9 @@ namespace GoFlex.Core.Entities
         public int EventId { get; set; }
         public DateTime Timestamp { get; set; }
 
-        public User User { get; set; }
-        public Event Event { get; set; }
-        public ICollection<OrderItem> Items { get; set; }
+        public virtual User User { get; set; }
+        public virtual Event Event { get; set; }
+        public virtual ICollection<OrderItem> Items { get; set; }
 
         public decimal TotalPrice => Items.Sum(x => x.EventPrice.Price * x.Quantity);
     }

@@ -8,15 +8,18 @@ namespace GoFlex.Core.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime DateTime { get; set; }
-        public byte[] Poster { get; set; }
+        public string Photo { get; set; }
 
         public int EventCategoryId { get; set; }
         public int LocationId { get; set; }
         public Guid OrganizerId { get; set; }
 
-        public EventCategory EventCategory { get; set; }
-        public Location Location { get; set; }
-        public User Organizer { get; set; }
-        public ICollection<EventPrice> Prices { get; set; }
+        public virtual EventCategory EventCategory { get; set; }
+        public virtual Location Location { get; set; }
+        public virtual User Organizer { get; set; }
+        public virtual ICollection<EventPrice> Prices { get; set; }
+
+        public string ShortDate => DateTime.ToString("d.MM.yyyy");
+        public string ShortDateTime => DateTime.ToString("dddd, d.MM.yyy, H:mm");
     }
 }

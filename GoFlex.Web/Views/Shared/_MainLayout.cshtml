@@ -1,0 +1,35 @@
+﻿@{
+    Layout = "_BaseLayout";
+}
+
+<header>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-primary text-white">
+        <div class="container">
+            <a class="navbar-brand" asp-area="" asp-controller="Event" asp-action="List">GoFlex</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse d-sm-inline-flex flex-sm-row">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Event" asp-action="List">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Location" asp-action="List">Locations</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+<div class="container py-3">
+    <main role="main">
+        @RenderBody()
+    </main>
+</div>
+
+@section Scripts
+{
+    @RenderSection("Scripts", false)
+}

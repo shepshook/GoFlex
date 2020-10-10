@@ -1,0 +1,41 @@
+﻿@model IEnumerable<Event>
+
+@{
+    Layout = "_MainLayout";
+}
+
+<div class="mx-auto card-deck">
+    @foreach (var _event in Model)
+    {
+        <div class="col-md-3">
+            <div class="card mx-0 mb-4">
+                <div class="card-header">
+                    @_event.Name
+                </div>
+                <a class="stretched-link" asp-controller="Event" asp-action="Details" asp-route-id="@_event.Id">
+                    <img class="w-100 h-auto" src="@_event.Photo" alt="" />
+                </a>
+                <p class="card-body pb-1 mb-0" style="max-height: 100px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">@_event.Description</p>
+                <div class="d-flex flex-row justify-content-end text-muted small p-2">@_event.ShortDate</div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            console.log("document is ready");
+  
+
+            $( ".card" ).hover(
+                function() {
+                    $(this).addClass('shadow-lg').css('cursor', 'pointer'); 
+                }, function() {
+                    $(this).removeClass('shadow-lg');
+                }
+            );
+        });
+    </script>
+}

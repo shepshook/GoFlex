@@ -6,6 +6,6 @@
         public int EventPriceId { get; set; }
         public int Quantity { get; set; }
 
-        public EventPrice EventPrice { get; set; }
+        public virtual EventPrice EventPrice { get; set; }
     }
 }

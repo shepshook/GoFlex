@@ -1,0 +1,11 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Order
+
+@{
+    Layout = "_MainLayout";
+}
+
+@foreach (var item in Model.Items)
+{
+    <span>@item.Quantity</span>
+}

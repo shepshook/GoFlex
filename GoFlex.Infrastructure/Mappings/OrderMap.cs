@@ -14,7 +14,6 @@ namespace GoFlex.Infrastructure.Mappings
             Property(x => x.Id).HasColumnName("OrderId").HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
 
             Property(x => x.Timestamp).IsRequired();
-            Property(x => x.TotalPrice).IsRequired();
 
             HasMany(order => order.Items).WithRequired().HasForeignKey(item => item.OrderId);
             HasRequired(order => order.Event).WithMany().HasForeignKey(order => order.EventId);

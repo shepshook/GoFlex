@@ -16,6 +16,7 @@ namespace GoFlex.Infrastructure.Mappings
 
             Property(x => x.Name).IsRequired().HasMaxLength(256);
             Property(x => x.Address).IsRequired().HasMaxLength(512);
+            Property(x => x.PhoneNumber).IsRequired().HasMaxLength(15);
             Property(x => x.Photo).IsOptional();
         }
     }

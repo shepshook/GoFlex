@@ -9,6 +9,6 @@ namespace GoFlex.Core.Entities
         public string PasswordSalt { get; set; }
         public int RoleId { get; set; }
 
-        public Role Role { get; set; }
+        public virtual Role Role { get; set; }
     }
 }
