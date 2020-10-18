@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -1085,11 +1085,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="wwwroot\node_modules\popper.js\index.d.ts" />
+    <PackageReference Include="Stripe.net" Version="39.16.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ViewModels\" />
+    <TypeScriptCompile Include="wwwroot\node_modules\popper.js\index.d.ts" />
   </ItemGroup>
 
   <ItemGroup>

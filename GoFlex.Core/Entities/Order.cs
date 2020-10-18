@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace GoFlex.Core.Entities
@@ -16,5 +15,6 @@ namespace GoFlex.Core.Entities
         public virtual ICollection<OrderItem> Items { get; set; }
 
         public decimal TotalPrice => Items.Sum(x => x.EventPrice.Price * x.Quantity);
+        public string TotalPriceFormatted => $"{TotalPrice:N} BYN";
     }
 }

@@ -25,6 +25,15 @@ namespace GoFlex.Infrastructure.Repositories
             return query.ToList();
         }
 
+        public IEnumerable<Event> GetPage<TKey>(int pageSize, int page, out int totalPages,
+            Expression<Func<Event, TKey>> order, bool desc = false, params Expression<Func<Event, bool>>[] predicates)
+        {
+            IQueryable<Event> query = desc ? dbSet.OrderByDescending(order) : dbSet.OrderBy(order);
+            query = query.ApplyPredicates(predicates);
+
+            return query.GetPage(pageSize, page, out totalPages);
+        }
+
         public void Insert(Event entity)
         {
             if (entity == null)

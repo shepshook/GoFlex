@@ -15,7 +15,7 @@ namespace GoFlex.Infrastructure.Mappings
             Property(x => x.EventPriceId).IsRequired();
             Property(x => x.Quantity).IsRequired();
 
-            HasRequired(x => x.EventPrice).WithMany().HasForeignKey(x => x.EventPriceId);
+            HasRequired(x => x.EventPrice).WithMany(x => x.OrderedItems).HasForeignKey(x => x.EventPriceId);
         }
     }
 }

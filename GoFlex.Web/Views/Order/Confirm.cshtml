@@ -1,0 +1,65 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Order
+
+@{
+    Layout = "_MainLayout";
+}
+
+<h2>Your order:</h2>
+<table class="table table-bordered col-6">
+    <thead>
+    <tr>
+        <th>Item</th>
+        <th>Price</th>
+        <th>Quantity</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>@item.EventPrice.Name</td>
+            <td>@item.EventPrice.FormattedPrice</td>
+            <td>@item.Quantity</td>
+        </tr>
+    }
+    <tr><td colspan="3">Total price: @Model.TotalPriceFormatted</td></tr>
+    </tbody>
+</table>
+<button class="btn btn-primary" id="checkout-button">Pay</button>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        // todo: move all keys to configs
+        var stripe = Stripe("pk_test_51HdZIQIbg49bp0FGEWhHRRjdEKq9iZ72td2f1FyQI6IP1iRWdxvRwjoJVgzTbdmYNg2aqA0xiADqmQuBLnfWbia100lc1uwyTe");
+        var checkoutButton = document.getElementById("checkout-button");
+
+        var url = @Url.Action("Create", "Payment");
+        var spinnerDiv = "<div class=\"spinner-grow spinner-grow-sm text-light\"></div>";
+
+        checkoutButton.addEventListener("click", function () {
+            checkoutButton.innerHTML = spinnerDiv;
+            fetch(url, {
+                    method: "POST"
+                })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (session) {
+                    return stripe.redirectToCheckout({ sessionId: session.id });
+                })
+                .then(function (result) {
+                    // If redirectToCheckout fails due to a browser or network
+                    // error, you should display the localized error message to your
+                    // customer using error.message.
+                    if (result.error) {
+                        alert(result.error.message);
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Error:", error);
+                });
+        });
+    </script>
+}

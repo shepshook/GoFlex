@@ -1,4 +1,7 @@
-﻿namespace GoFlex.Core.Entities
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace GoFlex.Core.Entities
 {
     public class EventPrice : Entity<int>
     {
@@ -9,7 +12,9 @@
         public int EventId { get; set; }
 
         public virtual Event Event { get; set; }
+        public virtual ICollection<OrderItem> OrderedItems { get; set; }
 
         public string FormattedPrice => $"{Price:N} BYN";
+        public int Remains => Total - OrderedItems.Select(item => item.Quantity).Sum();
     }
 }

@@ -1,25 +1,60 @@
-﻿@model IEnumerable<Event>
+﻿@using GoFlex.Web.ViewModels
+@model GoFlex.Web.ViewModels.EventListViewModel
+@addTagHelper *, GoFlex.Web
 
 @{
     Layout = "_MainLayout";
+
+    if (!Model.Page.Parameters.ContainsKey("order"))
+    {
+        Model.Page.Parameters.Add("order", EventListOrder.Date.ToString());
+    }
+    var orderings = new List<SelectListItem>
+    {
+        new SelectListItem("Event date", EventListOrder.Date.ToString()),
+        new SelectListItem("Create date", EventListOrder.CreateDate.ToString())
+    };
+
+    if (!Model.Page.Parameters.ContainsKey("category"))
+    {
+        Model.Page.Parameters.Add("category", "all");
+    }
+    var categories = new List<SelectListItem> { new SelectListItem("All categories", "All") };
+    categories.AddRange(Model.EventCategories.Select(x => new SelectListItem(x.Name, x.Id.ToString())));
 }
 
-<div class="mx-auto card-deck">
-    @foreach (var _event in Model)
-    {
-        <div class="col-md-3">
-            <div class="card mx-0 mb-4">
-                <div class="card-header">
-                    @_event.Name
+<div class="row">
+    <div class="col-2">
+        <h3>Filters</h3>
+        <form method="get" asp-controller="Event" asp-action="List">
+            <label asp-for="@Model.Page.Parameters["category"]" class="col-form-label">Category:</label>
+            <select name="category" asp-for="@Model.Page.Parameters["category"]" asp-items="categories" onchange="this.form.submit()" class="form-control"></select>
+            
+            <label asp-for="@Model.Page.Parameters["order"]" class="col-form-label">Order by:</label>
+            <select name="order" asp-for="@Model.Page.Parameters["order"]" asp-items="orderings" onchange="this.form.submit()" class="form-control"></select>
+        </form>
+    </div>
+    <div class="col-10">
+        <paging controller="Event" action="List" page-view-model="Model.Page"></paging>
+        <div class="card-deck">
+            @foreach (var _event in Model.Events)
+            {
+                var cardBackground = _event.IsNew ? "background-color: #fffde3" : ""; 
+                <div class="col-md-3">
+                    <div class="card mx-0 mb-4" style="@cardBackground">
+                        <div class="card-header">
+                            @_event.Name
+                        </div>
+                        <a class="stretched-link" asp-controller="Event" asp-action="Details" asp-route-id="@_event.Id">
+                            <img class="w-100 h-auto" src="@_event.Photo" alt="" />
+                        </a>
+                        <p class="card-body pb-1 mb-0" style="max-height: 100px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">@_event.Description</p>
+                        <div class="d-flex flex-row justify-content-end text-muted small p-2">@_event.ShortDate</div>
+                    </div>
                 </div>
-                <a class="stretched-link" asp-controller="Event" asp-action="Details" asp-route-id="@_event.Id">
-                    <img class="w-100 h-auto" src="@_event.Photo" alt="" />
-                </a>
-                <p class="card-body pb-1 mb-0" style="max-height: 100px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">@_event.Description</p>
-                <div class="d-flex flex-row justify-content-end text-muted small p-2">@_event.ShortDate</div>
-            </div>
+            }
         </div>
-    }
+    </div>
 </div>
 
 @section Scripts
@@ -27,8 +62,6 @@
     <script type="text/javascript">
         $(document).ready(function() {
             console.log("document is ready");
-  
-
             $( ".card" ).hover(
                 function() {
                     $(this).addClass('shadow-lg').css('cursor', 'pointer'); 

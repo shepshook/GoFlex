@@ -16,6 +16,7 @@ namespace GoFlex.Infrastructure.Mappings
             Property(x => x.Name).IsRequired().HasMaxLength(128);
             Property(x => x.Description).IsOptional().HasMaxLength(1024);
             Property(x => x.DateTime).IsRequired();
+            Property(x => x.CreateTime).IsRequired();
             Property(x => x.Photo).IsOptional();
 
             HasRequired(x => x.EventCategory).WithMany().HasForeignKey(x => x.EventCategoryId);

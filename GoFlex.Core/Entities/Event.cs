@@ -8,6 +8,7 @@ namespace GoFlex.Core.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime DateTime { get; set; }
+        public DateTime CreateTime { get; set; }
         public string Photo { get; set; }
 
         public int EventCategoryId { get; set; }
@@ -21,5 +22,6 @@ namespace GoFlex.Core.Entities
 
         public string ShortDate => DateTime.ToString("d.MM.yyyy");
         public string ShortDateTime => DateTime.ToString("dddd, d.MM.yyy, H:mm");
+        public bool IsNew => (DateTime.Now - CreateTime).Days <= 70;
     }
 }

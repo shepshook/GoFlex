@@ -3,22 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GoFlex.Web.Controllers
 {
-    public class LocationController : Controller
+    public class OrganizerController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public LocationController(IUnitOfWork unitOfWork)
+        public OrganizerController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
         [Route("[controller]/[action]")]
-        public IActionResult List()
+        public IActionResult Index()
         {
-            var list = _unitOfWork.LocationRepository.All();
-            return View(list);
+            return View();
         }
-
-        //todo: make a Location Details popup
     }
 }
