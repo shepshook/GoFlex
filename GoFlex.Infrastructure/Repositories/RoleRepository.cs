@@ -16,11 +16,9 @@ namespace GoFlex.Infrastructure.Repositories
 
         public Role Get(int key) => dbSet.Find(key);
 
-        public IEnumerable<Role> All(Expression<Func<Role, bool>> predicate)
+        public IEnumerable<Role> All(params Expression<Func<Role, bool>>[] predicates)
         {
-            var query = dbSet.AsQueryable();
-            if (predicate != null)
-                query = query.Where(predicate);
+            var query = dbSet.AsQueryable().ApplyPredicates(predicates);
 
             return query.ToList();
         }

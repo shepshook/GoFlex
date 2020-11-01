@@ -16,11 +16,9 @@ namespace GoFlex.Infrastructure.Repositories
 
         public EventCategory Get(int key) => dbSet.Find(key);
 
-        public IEnumerable<EventCategory> All(Expression<Func<EventCategory, bool>> predicate)
+        public IEnumerable<EventCategory> All(params Expression<Func<EventCategory, bool>>[] predicates)
         {
-            var query = dbSet.AsQueryable();
-            if (predicate != null)
-                query = query.Where(predicate);
+            var query = dbSet.AsQueryable().ApplyPredicates(predicates);
 
             return query.ToList();
         }

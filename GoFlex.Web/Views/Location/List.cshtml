@@ -8,7 +8,7 @@
 {
     <div class="jumbotron d-flex flex-row" style="background-color: #fafafa">
         <div class="col-md-3">
-            <img class="w-100 h-auto" src="@location.Photo"/>
+            <img class="w-100 h-auto" src="@location.Photo" />
         </div>
         <div class="col-md-9">
             <h3>@location.Name</h3>
@@ -17,4 +17,13 @@
             <p>@location.PhoneNumber</p>
         </div>
     </div>
+}
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#navLink2").addClass('active');
+        });
+    </script>
 }

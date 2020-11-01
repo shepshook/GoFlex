@@ -18,6 +18,7 @@ namespace GoFlex.Infrastructure.Mappings
             Property(x => x.DateTime).IsRequired();
             Property(x => x.CreateTime).IsRequired();
             Property(x => x.Photo).IsOptional();
+            Property(x => x.IsApproved).IsOptional();
 
             HasRequired(x => x.EventCategory).WithMany().HasForeignKey(x => x.EventCategoryId);
             HasRequired(x => x.Organizer).WithMany().HasForeignKey(x => x.OrganizerId);

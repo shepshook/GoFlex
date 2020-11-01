@@ -1,0 +1,30 @@
+﻿@using GoFlex.Web.ViewModels
+@model GoFlex.Web.ViewModels.LoginResult
+
+@{
+    ViewBag.Title = "Login";
+    Layout = "_BaseLayout";
+}
+
+<div class="text-center">
+    <div class="card form-login shadow-lg">
+        <div class="card-title h3">Please Login</div>
+        <div class="card-body">
+            <form method="post" asp-action="Login">
+                <label for="inputEmail" class="sr-only"></label>
+                <input id="inputEmail" type="text" placeholder="Email" name="email" class="form-control mb-2"
+                       required autofocus minlength="4" maxlength="128"/>
+                <label for="inputPassword" class="sr-only"></label>
+                <input id="inputPassword" type="password" placeholder="Password" name="password" class="form-control mb-2"
+                       required minlength="5" maxlength="128"/>
+                @if (Model != LoginResult.Success)
+                {
+                    <p class="text-danger">@Model</p>
+                }
+                @Html.ValidationSummary(false)
+                <input type="submit" value="Login" class="btn btn-primary"/>
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl"/>
+            </form>
+        </div>
+    </div>
+</div>

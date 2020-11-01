@@ -16,11 +16,9 @@ namespace GoFlex.Infrastructure.Repositories
 
         public Location Get(int key) => dbSet.Find(key);
 
-        public IEnumerable<Location> All(Expression<Func<Location, bool>> predicate)
+        public IEnumerable<Location> All(params Expression<Func<Location, bool>>[] predicates)
         {
-            var query = dbSet.AsQueryable();
-            if (predicate != null)
-                query = query.Where(predicate);
+            var query = dbSet.AsQueryable().ApplyPredicates(predicates);
 
             return query.ToList();
         }

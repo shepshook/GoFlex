@@ -16,11 +16,9 @@ namespace GoFlex.Infrastructure.Repositories
 
         public EventPrice Get(int key) => dbSet.Find(key);
 
-        public IEnumerable<EventPrice> All(Expression<Func<EventPrice, bool>> predicate)
+        public IEnumerable<EventPrice> All(params Expression<Func<EventPrice, bool>>[] predicates)
         {
-            var query = dbSet.AsQueryable();
-            if (predicate != null)
-                query = query.Where(predicate);
+            var query = dbSet.OrderByDescending(x => x.IsRemoved).ThenBy(x => x.Price).AsQueryable().ApplyPredicates(predicates);
 
             return query.ToList();
         }

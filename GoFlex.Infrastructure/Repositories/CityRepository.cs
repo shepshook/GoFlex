@@ -16,11 +16,9 @@ namespace GoFlex.Infrastructure.Repositories
 
         public City Get(int key) => dbSet.Find(key);
 
-        public IEnumerable<City> All(Expression<Func<City, bool>> predicate = null)
+        public IEnumerable<City> All(params Expression<Func<City, bool>>[] predicates)
         {
-            var query = dbSet.AsQueryable();
-            if (predicate != null)
-                query = query.Where(predicate);
+            var query = dbSet.AsQueryable().ApplyPredicates(predicates);
 
             return query.ToList();
         }

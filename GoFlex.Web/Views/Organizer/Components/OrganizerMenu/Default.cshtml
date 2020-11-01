@@ -1,0 +1,7 @@
+﻿@model int
+
+<div class="btn-group-vertical w-100 mb-3">
+    <a class="btn @(Model == 0 ? "btn-primary" : "btn-outline-primary")" asp-controller="Organizer" asp-action="Events">My events</a>
+    <a class="btn @(Model == 1 ? "btn-primary" : "btn-outline-primary")" asp-controller="Organizer" asp-action="Statistics">Statistics</a>
+    <a class="btn @(Model == 2 ? "btn-primary" : "btn-outline-primary")" asp-controller="Organizer" asp-action="AddEvent">Add event</a>
+</div>

@@ -1,0 +1,13 @@
+﻿.form-login {
+    bottom: 0;
+    height: 30%;
+    left: 0;
+    margin: auto;
+    max-width: 400px;
+    min-width: 200px;
+    padding: 40px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 50%;
+}

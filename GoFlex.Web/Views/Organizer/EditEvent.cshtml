@@ -1,0 +1,121 @@
+﻿@model GoFlex.Web.ViewModels.EventEditViewModel
+
+@{
+    Layout = "_MainLayout";
+}
+
+<div class="row">
+    <div class="col-lg-2">
+        @await Component.InvokeAsync("OrganizerMenu", 0)
+    </div>
+    <div class="col-lg-4 mb-5">
+        <h4>Edit event</h4>
+        <form method="post" asp-controller="Organizer" asp-action="SaveEvent">
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="form-group col-6">
+                    <label asp-for="Date"></label>
+                    <input asp-for="Date" class="form-control" />
+                    <span asp-validation-for="Date" class="text-danger"></span>
+                </div>
+                <div class="form-group col-6">
+                    <label asp-for="Time"></label>
+                    <input asp-for="Time" class="form-control" />
+                    <span asp-validation-for="Time" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="CategoryId"></label>
+                <select asp-for="CategoryId" asp-items="@(new SelectList(Model.Categories, "Id", "Name"))" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="LocationId"></label>
+                <select asp-for="LocationId" asp-items="@(new SelectList(Model.Locations, "Id", "Name"))" class="form-control"></select>
+                <span class="small text-muted">Please, <a href="mailto:nikitashepshuk@gmail.com">contact us</a> if you want to add a new location.</span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Photo"></label>
+                <input asp-for="Photo" class="form-control" />
+            </div>
+            <div class="flex-row justify-content-end">
+                <input type="submit" class="btn btn-primary" value="Save" />
+            </div>
+        </form>
+    </div>
+    <div class="col-lg-6">
+        <h4>Edit prices</h4>
+        <table class="table table-borderless table-responsive-lg">
+            <thead>
+            <tr>
+                <th style="width: 30%">Name</th>
+                <th>Total</th>
+                <th>Price</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var price in Model.Prices)
+            {
+                @if (price.IsRemoved)
+                {
+                    <tr>
+                        <td>@price.Name</td>
+                        <td>@price.Total</td>
+                        <td>@price.Price</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        <td><input form="priceForm(@price.Id)" asp-for="CurrentPrice.Name" value="@price.Name" class="form-control"/></td>
+                        <td><input form="priceForm(@price.Id)" asp-for="CurrentPrice.Total" value="@price.Total" class="form-control"/></td>
+                        <td><input form="priceForm(@price.Id)" asp-for="CurrentPrice.Price" value="@price.Price" class="form-control"/></td>
+                        <td class="d-flex align-items-center">
+                            <form method="post" id="priceForm(@price.Id)" asp-action="SavePrice" class="mr-2">
+                                <input type="hidden" asp-for="Id"/>
+                                <input type="hidden" asp-for="CurrentPrice.Id" value="@price.Id"/>
+                                <input type="submit" class="btn btn-outline-primary" value="Save"/>
+                            </form>
+                            <form method="post" asp-action="RemovePrice">
+                                <input type="hidden" asp-for="Id"/>
+                                <input type="hidden" name="priceId" value="@price.Id"/>
+                                <input type="submit" class="btn btn-outline-secondary" value="Remove"/>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            <tr style="border-top: 1px solid #DDD;">
+                <td>
+                    <input form="priceForm" asp-for="CurrentPrice.Name" class="form-control" placeholder="New name"/>
+                    <span asp-validation-for="CurrentPrice.Name" class="text-danger"></span>
+                </td>
+                <td>
+                    <input form="priceForm" asp-for="CurrentPrice.Total" class="form-control" placeholder="New total count"/>
+                    <span asp-validation-for="CurrentPrice.Total" class="text-danger"></span>
+                </td>
+                <td>
+                    <input form="priceForm" asp-for="CurrentPrice.Price" class="form-control" placeholder="New price"/>
+                    <span asp-validation-for="CurrentPrice.Price" class="text-danger"></span>
+                </td>
+                <td>
+                    <form method="post" id="priceForm" asp-action="SavePrice">
+                        <input type="hidden" asp-for="Id"/>
+                        <input type="submit" class="btn btn-primary" value="Add"/>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

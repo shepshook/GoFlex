@@ -1,0 +1,55 @@
+﻿@model IEnumerable<Event>
+
+@{
+    Layout = "_MainLayout";
+}
+
+<div class="row">
+    <div class="col-md-2">
+        @await Component.InvokeAsync("OrganizerMenu", 1)
+    </div>
+    <div class="col-md-10">
+        @foreach (var item in Model)
+        {
+            <div class="jumbotron row p-3" style="background-color: #fafafa">
+                <div class="col-4 flex-wrap d-flex">
+                    <h4>@item.Name</h4>
+                    <img src="@item.Photo" alt=""/>
+                </div>
+                <div class="col-8">
+                    <table class="table table-borderless table-responsive-md">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Sold</th>
+                            <th>Earned</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var price in item.Prices.OrderBy(x => x.Price))
+                        {
+                            var removedClass = price.IsRemoved ? "text-muted" : "";
+                            <tr class="@removedClass">
+                                <td>@price.Name</td>
+                                <td>@price.FormattedPrice</td>
+                                <td>@price.Sold</td>
+                                <td>@($"{price.Sold * price.Price :N} BYN")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#navLink3").addClass('active');
+        });
+    </script>
+}

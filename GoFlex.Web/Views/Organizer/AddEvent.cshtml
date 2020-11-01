@@ -1,0 +1,64 @@
+﻿@model GoFlex.Web.ViewModels.EventEditViewModel
+
+@{
+    Layout = "_MainLayout";
+}
+
+<div class="row">
+    <div class="col-md-2">
+        @await Component.InvokeAsync("OrganizerMenu", 2)
+    </div>
+    <div class="col-md-10">
+        <h2>Add new event</h2>
+        <form method="post" asp-controller="Event" asp-action="Add" class="col-md-6">
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="form-group col-6">
+                    <label asp-for="Date"></label>
+                    <input asp-for="Date" class="form-control" />
+                    <span asp-validation-for="Date" class="text-danger"></span>
+                </div>
+                <div class="form-group col-6">
+                    <label asp-for="Time"></label>
+                    <input asp-for="Time" class="form-control" />
+                    <span asp-validation-for="Time" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="CategoryId"></label>
+                <select asp-for="CategoryId" asp-items="@(new SelectList(Model.Categories, "Id", "Name"))" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="LocationId"></label>
+                <select asp-for="LocationId" asp-items="@(new SelectList(Model.Locations, "Id", "Name"))" class="form-control"></select>
+                <span class="small text-muted">Please, <a href="mailto:nikitashepshuk@gmail.com">contact us</a> if you want to add a new location.</span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Photo"></label>
+                <input asp-for="Photo" class="form-control" />
+            </div>
+            <div class="flex-row justify-content-end">
+                <input type="submit" class="btn btn-primary" value="Save" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#navLink3").addClass('active');
+        });
+    </script>
+}

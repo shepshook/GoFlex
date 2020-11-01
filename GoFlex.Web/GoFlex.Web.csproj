@@ -1097,4 +1097,8 @@
     <ProjectReference Include="..\GoFlex.Infrastructure\GoFlex.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\" />
+  </ItemGroup>
+
 </Project>

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GoFlex.Core.Repositories.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 using Stripe.Checkout;
@@ -11,6 +12,7 @@ using Stripe.Checkout;
 namespace GoFlex.Web.Areas.Api
 {
     [Area("Api")]
+    [Authorize]
     [ApiController]
     public class PaymentController : ControllerBase
     {
@@ -23,7 +25,7 @@ namespace GoFlex.Web.Areas.Api
             _unitOfWork = unitOfWork;
         }
 
-        [HttpPost("[area]/[controller]/[action]")]
+        [HttpPost("[area]/[controller]/[action]/{id:int}")]
         public ActionResult Create(int id, string returnUrl = null)
         {
             var host = Request.Scheme + Uri.SchemeDelimiter + Request.Host;

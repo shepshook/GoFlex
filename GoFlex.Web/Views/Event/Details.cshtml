@@ -5,7 +5,7 @@
 }
 
 <div class="row mb-4">
-    <div class="col-md-4">
+    <div class="col-md-4 mb-3">
         <img class="w-100 h-auto" src="@Model.Photo" />
     </div>
     <div class="col-md-8">
@@ -18,14 +18,14 @@
     <table class="table table-hover" id="pricesTable">
         @{
             var counter = 0;
-            foreach (var price in Model.Prices)
+            foreach (var price in Model.Prices.Where(x => !x.IsRemoved))
             {
                 <tr>
-                    <input type="hidden" name="id[@(counter)]" value="@price.Id"/>
-                    <input type="hidden" id="price@(counter)" value="@price.Price"/>
                     <td>@price.Name</td>
                     <td>@price.FormattedPrice</td>
                     <td style="width: 15%">
+                        <input type="hidden" name="id[@(counter)]" value="@price.Id"/>
+                        <input type="hidden" id="price@(counter)" value="@price.Price"/>
                         <input type="number" id="counter@(counter)" name="count[@(counter++)]" min="0" max="@Math.Min(20, price.Remains)" class="form-control" value="0" onchange="javascript: countTotalPrice();"/>
                     </td>
                 </tr>

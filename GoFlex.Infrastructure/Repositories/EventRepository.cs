@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.Entity.Core;
 using System.Linq;
 using System.Linq.Expressions;
@@ -16,11 +17,9 @@ namespace GoFlex.Infrastructure.Repositories
 
         public Event Get(int key) => dbSet.Find(key);
 
-        public IEnumerable<Event> All(Expression<Func<Event, bool>> predicate)
+        public IEnumerable<Event> All(params Expression<Func<Event, bool>>[] predicates)
         {
-            var query = dbSet.AsQueryable();
-            if (predicate != null)
-                query = query.Where(predicate);
+            var query = MakeInclusions().OrderBy(x => x.CreateTime).AsQueryable().ApplyPredicates(predicates);
 
             return query.ToList();
         }
@@ -28,7 +27,8 @@ namespace GoFlex.Infrastructure.Repositories
         public IEnumerable<Event> GetPage<TKey>(int pageSize, int page, out int totalPages,
             Expression<Func<Event, TKey>> order, bool desc = false, params Expression<Func<Event, bool>>[] predicates)
         {
-            IQueryable<Event> query = desc ? dbSet.OrderByDescending(order) : dbSet.OrderBy(order);
+            var query = MakeInclusions();
+            query = desc ? query.OrderByDescending(order) : query.OrderBy(order);
             query = query.ApplyPredicates(predicates);
 
             return query.GetPage(pageSize, page, out totalPages);
@@ -43,5 +43,11 @@ namespace GoFlex.Infrastructure.Repositories
         }
 
         public void Remove(int key) => dbSet.Remove(dbSet.Find(key) ?? throw new ObjectNotFoundException());
+
+        private IQueryable<Event> MakeInclusions() =>
+            dbSet.Include(x => x.Location)
+                .Include(x => x.EventCategory)
+                .Include(x => x.Organizer)
+                .Include(x => x.Prices);
     }
 }

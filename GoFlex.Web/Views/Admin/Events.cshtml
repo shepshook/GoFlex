@@ -1,0 +1,60 @@
+﻿@model IEnumerable<Event>
+
+@{
+    Layout = "_MainLayout";
+}
+
+@foreach (var item in Model)
+{
+    <div class="jumbotron border d-inline-flex flex-row justify-content-start align-items-center p-3 w-100" style="background-color: #efefef">
+        <form method="get" style="width: 40%" class="mr-4" asp-action="Details" asp-controller="Event" asp-route-id="@item.Id">
+            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+            <h4 class="mb-2" asp-action="EditEvent">@item.Name</h4>
+            <span class="text-muted small">@item.EventCategory.Name</span>
+        </form>
+        <div>
+            <p class="mb-1">On @item.ShortDate</p>
+            <span>At @item.Location.Name</span>
+        </div>
+        <div class="ml-auto flex-row d-flex">
+            <form method="post" asp-action="Vote" asp-controller="Admin" class="mr-2">
+                <input type="hidden" name="vote" value="true" />
+                <input type="hidden" name="id" value="@item.Id" />
+                <button type="submit" class="btn btn-outline-secondary">
+                    @*&#9989;*@
+                    <i class="fa fa-lg fa-check-circle" style="color: #029c44"></i>
+                </button>
+            </form>
+            <form method="post" asp-action="Vote" asp-controller="Admin" class="mr-2">
+                <input type="hidden" name="vote" value="false" />
+                <input type="hidden" name="id" value="@item.Id" />
+                <button type="submit" class="btn btn-outline-secondary">
+                    @*&#10060;*@
+                    <i class="fa fa-lg fa-times-circle" style="color: #d6110b"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+}
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#navLink4").addClass('active');
+            $(".jumbotron").hover(
+                function() {
+                    $(this).addClass('shadow-lg').css('cursor', 'pointer');
+                },
+                function() {
+                    $(this).removeClass('shadow-lg');
+                }
+            );
+            $(".jumbotron").click(
+                function () {
+                    $(this).children("form").submit();
+                }
+            );
+        });
+    </script>
+}

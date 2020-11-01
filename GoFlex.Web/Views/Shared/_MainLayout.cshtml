@@ -1,5 +1,6 @@
 ﻿@{
     Layout = "_BaseLayout";
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
 
 <header>
@@ -13,12 +14,37 @@
             <div class="collapse navbar-collapse d-sm-inline-flex flex-sm-row">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="Event" asp-action="List">Events</a>
+                        <a class="nav-link" asp-area="" asp-controller="Event" asp-action="List" id="navLink1">Events</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="Location" asp-action="List">Locations</a>
+                        <a class="nav-link" asp-area="" asp-controller="Location" asp-action="List" id="navLink2">Locations</a>
                     </li>
+                    @if (User.IsInRole("Organizer") || User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Organizer" asp-action="Events" id="navLink3">&#128084; Management</a>
+                        </li>
+                    }
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Events" id="navLink4">&#128081; Admin</a>
+                        </li>
+                    }
                 </ul>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <div>
+                        <a class="btn btn-outline-info" asp-action="SignUp" asp-controller="Auth" asp-route-returnUrl="@returnUrl">Sign Up</a>
+                        <a class="btn btn-outline-secondary" asp-action="Login" asp-controller="Auth" asp-route-returnUrl="@returnUrl">Log In</a>
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        <a class="btn btn-outline-secondary" asp-action="Logout" asp-controller="Auth" asp-route-returnUrl="@returnUrl">Log Out</a>
+                    </div>
+                }
             </div>
         </div>
     </nav>

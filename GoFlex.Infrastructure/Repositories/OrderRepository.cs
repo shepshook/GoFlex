@@ -17,11 +17,9 @@ namespace GoFlex.Infrastructure.Repositories
 
         public Order Get(int key) => MakeInclusions().SingleOrDefault(x => x.Id == key);
 
-        public IEnumerable<Order> All(Expression<Func<Order, bool>> predicate)
+        public IEnumerable<Order> All(params Expression<Func<Order, bool>>[] predicates)
         {
-            var query = MakeInclusions().AsQueryable();
-            if (predicate != null)
-                query = query.Where(predicate);
+            var query = MakeInclusions().AsQueryable().ApplyPredicates(predicates);
 
             return query.ToList();
         }

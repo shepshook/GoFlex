@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoFlex.Web.Controllers
@@ -17,6 +18,7 @@ namespace GoFlex.Web.Controllers
         }
 
         //todo: probably make a rest api version of this action with popup and move it to PaymentController
+        [Authorize]
         [HttpPost("[controller]/[action]")]
         public IActionResult Confirm(int[] id, int?[] count)
         {
@@ -33,8 +35,7 @@ namespace GoFlex.Web.Controllers
 
             order.Event = _unitOfWork.EventPriceRepository.Get(order.Items.First().EventPriceId).Event;
 
-            //todo: provide ID of an authenticated user
-            order.UserId = new Guid("3424F6C3-7327-41F6-988C-BB5E582661E7");
+            order.UserId = Guid.Parse(User.FindFirst("userId").Value);
 
             _unitOfWork.OrderRepository.Insert(order);
             _unitOfWork.Commit();

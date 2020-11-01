@@ -17,6 +17,7 @@ namespace GoFlex.Infrastructure.Mappings
             Property(x => x.Name).IsRequired().HasMaxLength(64);
             Property(x => x.Price).IsRequired();
             Property(x => x.Total).IsRequired();
+            Property(x => x.IsRemoved).IsRequired();
         }
     }
 }

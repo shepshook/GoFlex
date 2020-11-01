@@ -16,11 +16,9 @@ namespace GoFlex.Infrastructure.Repositories
 
         public User Get(Guid key) => dbSet.Find(key);
 
-        public IEnumerable<User> All(Expression<Func<User, bool>> predicate)
+        public IEnumerable<User> All(params Expression<Func<User, bool>>[] predicates)
         {
-            var query = dbSet.AsQueryable();
-            if (predicate != null)
-                query = query.Where(predicate);
+            var query = dbSet.AsQueryable().ApplyPredicates(predicates);
 
             return query.ToList();
         }

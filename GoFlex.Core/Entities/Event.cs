@@ -10,6 +10,7 @@ namespace GoFlex.Core.Entities
         public DateTime DateTime { get; set; }
         public DateTime CreateTime { get; set; }
         public string Photo { get; set; }
+        public bool? IsApproved { get; set; }
 
         public int EventCategoryId { get; set; }
         public int LocationId { get; set; }

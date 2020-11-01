@@ -1,0 +1,112 @@
+﻿@using GoFlex.Web.ViewModels
+@model GoFlex.Web.ViewModels.EventListViewModel
+@addTagHelper *, GoFlex.Web
+
+@{
+    Layout = "_MainLayout";
+
+    if (!Model.Page.Parameters.ContainsKey("order"))
+    {
+        Model.Page.Parameters.Add("order", EventListOrder.Date.ToString());
+    }
+    var orderings = new List<SelectListItem>
+{
+        new SelectListItem("Event date", EventListOrder.Date.ToString()),
+        new SelectListItem("Create date", EventListOrder.CreateDate.ToString())
+    };
+
+    if (!Model.Page.Parameters.ContainsKey("category"))
+    {
+        Model.Page.Parameters.Add("category", null);
+    }
+    var categories = new List<SelectListItem> { new SelectListItem("All categories", "All") };
+    categories.AddRange(Model.EventCategories.Select(x => new SelectListItem(x.Name, x.Id.ToString())));
+
+    if (!Model.Page.Parameters.ContainsKey("onlyActive"))
+    {
+        Model.Page.Parameters.Add("onlyActive", false);
+    }
+
+    if (!Model.Page.Parameters.ContainsKey("onlyApproved"))
+    {
+        Model.Page.Parameters.Add("onlyApproved", false);
+    }
+}
+
+<div class="row">
+    <div class="col-md-2 mb-3">
+        @await Component.InvokeAsync("OrganizerMenu", 0)
+
+        <h3>Filters</h3>
+        <form method="get" asp-controller="Organizer" asp-action="Events">
+            <div class="form-group">
+                <label asp-for="@Model.Page.Parameters["category"]" class="col-form-label">Category:</label>
+                <select name="category" asp-for="@Model.Page.Parameters["category"]" asp-items="categories" onchange="this.form.submit()" class="form-control"></select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.Page.Parameters["order"]" class="col-form-label">Order by:</label>
+                <select name="order" asp-for="@Model.Page.Parameters["order"]" asp-items="orderings" onchange="this.form.submit()" class="form-control"></select>
+            </div>
+            
+            <div class="form-group d-flex align-items-center">
+                <input name="onlyActive" type="checkbox" asp-for="@Model.Page.Parameters["onlyActive"]" onchange="this.form.submit()" class="form-check stretched-link" />
+                <label asp-for="@Model.Page.Parameters["onlyActive"]" class="form-check-label p-2">Show only active events</label>
+            </div>    
+            
+            <div class="form-group d-flex align-items-center">
+                <input name="onlyApproved" type="checkbox" asp-for="@Model.Page.Parameters["onlyApproved"]" onchange="this.form.submit()" class="form-check stretched-link" />
+                <label asp-for="@Model.Page.Parameters["onlyApproved"]" class="form-check-label p-2">Show only approved events</label>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-10">
+        <paging controller="Organizer" action="Events" page-view-model="Model.Page"></paging>
+        @foreach (var _event in Model.Events)
+        {
+            var (backgroundColor, iconClass, iconColor, status) = _event.IsApproved switch 
+            {
+                null  => ("#efefef", "fa-question-circle", "#4d4d4d", "Waiting"),
+                false => ("#ffe1d9", "fa-times-circle",    "#d6110b", "Declined"),
+                true  => ("#d9ffe2", "fa-check-circle",    "#029c44", "Accepted")
+            };
+            <div class="jumbotron border d-inline-flex flex-row justify-content-start align-items-center p-3 w-100" style="background-color: @backgroundColor">
+                <form method="get" style="width: 40%" class="mr-4" asp-action="EditEvent" asp-controller="Organizer" asp-route-id="@_event.Id">
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString"/>
+                    <h4 class="mb-2" asp-action="EditEvent">@_event.Name</h4>
+                    <span class="text-muted small">@_event.EventCategory.Name</span>
+                </form>
+                <div>
+                    <p class="mb-1">On @_event.ShortDate</p>
+                    <span>At @_event.Location.Name</span>
+                </div>
+                <div class="ml-auto" style="color: @iconColor">
+                    <span>@status</span>
+                    <i class="fa fa-lg @iconClass"></i>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#navLink3").addClass('active');
+            $(".jumbotron").hover(
+                function() {
+                    $(this).addClass('shadow-lg').css('cursor', 'pointer');
+                },
+                function() {
+                    $(this).removeClass('shadow-lg');
+                }
+            );
+            $(".jumbotron").click(
+                function () {
+                    $(this).children("form").submit();
+                }
+            );
+        });
+    </script>
+}
