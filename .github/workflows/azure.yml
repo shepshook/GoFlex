@@ -45,9 +45,25 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
-    - name: 'Deploy to Azure WebApp'
+    - name: Deploy to Azure WebApp
+      id: deploy
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+    - name: Notify Success on Telegram
+      if: ${{ steps.deploy.conclusion == 'success' }}
+      uses: appleboy/telegram-action@0.0.3
+      with:
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        args: ✔️ Deploy succeeded
+    - name: Notify Failure on Telegram
+      if: ${{ steps.deploy.conclusion != 'success' }}
+      uses: appleboy/telegram-action@0.0.3
+      with:
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        args: ❌ Deploy failed
+
