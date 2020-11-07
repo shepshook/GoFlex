@@ -7,14 +7,23 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Events;
 using Stripe;
 
 namespace GoFlex.Web
 {
     public class Startup
     {
+        private IConfiguration Configuration { get; }
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
@@ -30,13 +39,21 @@ namespace GoFlex.Web
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IEventService, Services.EventService>();
             services.AddScoped<IAuthService, AuthService>();
+
+            var outputTemplate = "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message}{NewLine}in method {MemberName} at {FilePath}:{LineNumber}{NewLine}{Exception}{NewLine}";
+            services.AddScoped<ILogger>(x =>
+                new LoggerConfiguration()
+                    .MinimumLevel.Information()
+                    .Enrich.FromLogContext()
+                    .WriteTo.File("Logs/log.txt", outputTemplate: outputTemplate)
+                    .WriteTo.File("Logs/errors.txt", outputTemplate: outputTemplate, restrictedToMinimumLevel: LogEventLevel.Error)
+                    .WriteTo.Console(outputTemplate: outputTemplate)
+                    .CreateLogger());
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //todo: move the key to configs
-            StripeConfiguration.ApiKey =
-                "sk_test_51HdZIQIbg49bp0FGFkLkYfxwt8CaK57JwNTNApnzZ9AZ4UcumYXqJjGFn64VATNdpopdSYpFcm9tPFZSCGY9IbBn008jn8p4Cp";
+            StripeConfiguration.ApiKey = Configuration["Stripe:ApiKey"];
 
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();

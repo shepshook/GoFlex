@@ -3,23 +3,25 @@ using System.Collections.Generic;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using GoFlex.Core.Entities;
 using GoFlex.Web.Services.Abstractions;
 using GoFlex.Web.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace GoFlex.Web.Controllers
 {
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
+        private readonly ILogger _logger;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, ILogger logger)
         {
             _authService = authService;
+            _logger = logger.ForContext<AuthController>();
         }
 
         [HttpGet("[action]")]
@@ -49,7 +51,10 @@ namespace GoFlex.Web.Controllers
 
             var user = _authService.GetUser(email);
             if (user == null || !_authService.VerifyPassword(user, password))
+            {
+                _logger.Here().Information("Failed login attempt for {Email}", email);
                 return View(LoginResult.IncorrectPassword);
+            }
 
             var claims = new List<Claim>
             {
@@ -61,7 +66,7 @@ namespace GoFlex.Web.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
                 new AuthenticationProperties { AllowRefresh = true });
 
-            //_logger.Information("User {Name} with Id {Id} has logged in.", user.FullName, user.Id);
+            _logger.Here().Information("User {Email} with Id {Id} has logged in.", user.Email, user.Id);
 
             if (string.IsNullOrEmpty(returnUrl))
                 return RedirectToAction("List", "Event");
@@ -77,19 +82,19 @@ namespace GoFlex.Web.Controllers
         }
 
         [HttpPost("[action]")]
-        public IActionResult SignUp(string email, string password, string confirmPassword, bool isOrganizer, string returnUrl)
+        public IActionResult SignUp(SignUpViewModel model, string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
 
-            if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(model.Email))
                 ModelState.AddModelError("email", "Email cannot be empty");
-            else if (email.Length < 4 || email.Length > 128)
+            else if (model.Email.Length < 4 || model.Email.Length > 128)
                 ModelState.AddModelError("email", "Email's length must be [4..128]");
             else
             {
                 try
                 {
-                    email = new MailAddress(email).Address;
+                    model.Email = new MailAddress(model.Email).Address;
                 }
                 catch (FormatException)
                 {
@@ -97,33 +102,37 @@ namespace GoFlex.Web.Controllers
                 }
             }
 
-            if (string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(model.Password))
                 ModelState.AddModelError("password", "Password cannot be empty");
-            else if (password.Length < 4 || password.Length > 128)
+            else if (model.Password.Length < 4 || model.Password.Length > 128)
                 ModelState.AddModelError("password", "Password's length must be [5..128]");
 
-            if (!string.Equals(password, confirmPassword))
+            if (!string.Equals(model.Password, model.ConfirmPassword))
                 ModelState.AddModelError("password", "Passwords must match");
 
             if (!ModelState.IsValid)
-                return View(new {returnUrl = returnUrl});
+                return View("SignUp", model);
 
-            var roleName = isOrganizer ? "Organizer" : "User";
+            var roleName = model.IsOrganizer ? "Organizer" : "User";
 
-            if (_authService.CreateUser(email, password, roleName))
+            if (_authService.CreateUser(model.Email, model.Password, roleName))
+            {
+                _logger.Here().Information("New user created: {Email}", model.Email);
                 return Redirect(returnUrl);
+            }
 
             ModelState.AddModelError("email", "This email is already occupied");
-            return View(new {returnUrl = returnUrl});
+            return View(model);
         }
 
         [Authorize]
         [Route("[action]")]
         public async Task<IActionResult> Logout(string returnUrl)
         {
-            //_logger.Information("User {Name} with Id {Id} has logged out.",
-            //    HttpContext.User.FindFirst(ClaimTypes.Name).Value, HttpContext.User.FindFirst("userId").Value);
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            _logger.Here().Information("User with Id {Id} has logged out.", HttpContext.User.FindFirst("userId").Value);
+
             if (string.IsNullOrWhiteSpace(returnUrl))
                 return RedirectToAction("List", "Event");
 

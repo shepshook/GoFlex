@@ -2,6 +2,8 @@
 using GoFlex.Core.Repositories;
 using GoFlex.Core.Repositories.Abstractions;
 using GoFlex.Infrastructure.Repositories;
+using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace GoFlex.Infrastructure
 {
@@ -20,6 +22,8 @@ namespace GoFlex.Infrastructure
 
         private GoFlexContext Context { get; }
 
+        private ILogger Logger { get; }
+
         public IEventRepository EventRepository => _eventRepository ??= new EventRepository(Context);
         public IEventCategoryRepository EventCategoryRepository => _eventCategoryRepository ??= new EventCategoryRepository(Context); 
         public IEventPriceRepository EventPriceRepository => _eventPriceRepository ??= new EventPriceRepository(Context);
@@ -29,9 +33,11 @@ namespace GoFlex.Infrastructure
         public IUserRepository UserRepository => _userRepository ??= new UserRepository(Context);
         public ICityRepository CityRepository => _cityRepository ??= new CityRepository(Context);
 
-        public UnitOfWork()
+        public UnitOfWork(IConfiguration configuration, ILogger logger)
         {
-            Context = new GoFlexContext("Server=localhost; Database=GoFlex; Integrated Security=true");
+            Logger = logger.ForContext<UnitOfWork>();
+            Context = new GoFlexContext(configuration["ConnectionStrings:DefaultConnection"]);
+            Logger.Debug("Database connection established: {DataSource}", Context.Database.Connection.DataSource);
         }
 
         public void Dispose()

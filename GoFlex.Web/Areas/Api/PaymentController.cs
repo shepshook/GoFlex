@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using GoFlex.Core.Repositories.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Serilog;
 using Stripe;
 using Stripe.Checkout;
 
@@ -16,13 +18,15 @@ namespace GoFlex.Web.Areas.Api
     [ApiController]
     public class PaymentController : ControllerBase
     {
-        //todo: move the key to configs
-        private const string WebhookSecret = "whsec_hEosIrhMeJ4SQPwjYRqJwcmniWqUo0NX";
+        private readonly string _webhookSecret;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger _logger;
 
-        public PaymentController(IUnitOfWork unitOfWork)
+        public PaymentController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger logger)
         {
             _unitOfWork = unitOfWork;
+            _webhookSecret = configuration["Stripe:WebhookSecret"];
+            _logger = logger.ForContext<PaymentController>();
         }
 
         [HttpPost("[area]/[controller]/[action]/{id:int}")]
@@ -32,8 +36,7 @@ namespace GoFlex.Web.Areas.Api
 
             var order = _unitOfWork.OrderRepository.Get(id);
 
-            //todo: verify that authenticated user's id == order.UserId
-            if (order == null)
+            if (order == null || User.FindFirst("userId").Value != order.UserId.ToString())
                 return NotFound();
 
             var options = new SessionCreateOptions
@@ -63,17 +66,27 @@ namespace GoFlex.Web.Areas.Api
 
             var service = new SessionService();
             var session = service.Create(options);
+            _logger.Here().Information("New order created: {@Items}", options.LineItems.Select(x => new
+            {
+                Name = x.PriceData.ProductData.Name,
+                Price = x.PriceData.UnitAmount,
+                Qty = x.Quantity
+            }));
+
             return new JsonResult(new {id = session.Id});
         }
 
-        [HttpPost("[area]/[controller]/[action]")]
+        [HttpPost("webhook")]
         public async Task<IActionResult> Complete()
         {
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
 
             try
             {
-                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], WebhookSecret);
+                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], _webhookSecret);
+
+                _logger.Here().Information("Webhook activated for event {@Event}", stripeEvent);
+
                 Session session;
 
                 switch (stripeEvent.Type)
@@ -121,11 +134,19 @@ namespace GoFlex.Web.Areas.Api
             var id = int.Parse(session.Metadata["OrderId"]);
             var order = _unitOfWork.OrderRepository.Get(id);
             var email = session.Customer.Email;
+
+            _logger.Here().Information("Payment for order {@Order} received from {Email}", order, email);
         }
 
         private void NotifyCustomer(Session session)
         {
             //todo: notify customer about failed payment by email
+
+            var id = int.Parse(session.Metadata["OrderId"]);
+            var order = _unitOfWork.OrderRepository.Get(id);
+            var email = session.Customer.Email;
+
+            _logger.Here().Warning("Payment for order {@Order} failed for {Email}", order, email);
         }
     }
 }

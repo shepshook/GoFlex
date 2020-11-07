@@ -19,7 +19,7 @@ namespace GoFlex.Web.Services
 
         public User GetUser(string search)
         {
-            return _unitOfWork.UserRepository.All(x => x.Email.Contains(search)).SingleOrDefault();
+            return _unitOfWork.UserRepository.All(x => x.Email == search).SingleOrDefault();
         }
 
         public bool CreateUser(string email, string password, string roleName)

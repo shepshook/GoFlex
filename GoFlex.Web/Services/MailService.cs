@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using GoFlex.Web.Services.Abstractions;
 
 namespace GoFlex.Web.Services
 {
-    public class MailService
+    public class MailService : IMailService
     {
+
     }
 }

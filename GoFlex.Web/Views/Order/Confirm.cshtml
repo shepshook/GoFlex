@@ -1,5 +1,4 @@
-﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model Order
+﻿@model GoFlex.Web.ViewModels.OrderViewModel
 
 @{
     Layout = "_MainLayout";
@@ -15,7 +14,7 @@
     </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model.Items)
+    @foreach (var item in Model.Order.Items)
     {
         <tr>
             <td>@item.EventPrice.Name</td>
@@ -23,7 +22,7 @@
             <td>@item.Quantity</td>
         </tr>
     }
-    <tr><td colspan="3">Total price: @Model.TotalPriceFormatted</td></tr>
+    <tr><td colspan="3">Total price: @Model.Order.TotalPriceFormatted</td></tr>
     </tbody>
 </table>
 <button class="btn btn-primary" id="checkout-button">Pay</button>
@@ -31,12 +30,11 @@
 @section Scripts
 {
     <script type="text/javascript">
-        // todo: move all keys to configs
-        var stripe = Stripe("pk_test_51HdZIQIbg49bp0FGEWhHRRjdEKq9iZ72td2f1FyQI6IP1iRWdxvRwjoJVgzTbdmYNg2aqA0xiADqmQuBLnfWbia100lc1uwyTe");
+        var stripe = Stripe("@Model.StripePublicKey");
         var checkoutButton = document.getElementById("checkout-button");
 
-        var url = "@Url.Action("Create", "Payment", Model.Id)";
-        url = "/api/payment/create/@Model.Id";
+        var url = "@Url.Action("Create", "Payment", Model.Order.Id)";
+        url = "/api/payment/create/@Model.Order.Id";
         var spinnerDiv = "<div class=\"spinner-grow spinner-grow-sm text-light\"></div>";
 
         checkoutButton.addEventListener("click",
