@@ -58,12 +58,12 @@ jobs:
       with:
         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         to: ${{ secrets.TELEGRAM_CHAT_ID }}
-        args: ✔️ Deploy succeeded
+        message: ✔️ Deploy succeeded
     - name: Notify Failure on Telegram
       if: ${{ steps.deploy.conclusion != 'success' }}
       uses: appleboy/telegram-action@0.0.3
       with:
         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         to: ${{ secrets.TELEGRAM_CHAT_ID }}
-        args: ❌ Deploy failed
+        message: ❌ Deploy failed
 
