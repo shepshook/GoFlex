@@ -54,14 +54,14 @@ jobs:
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
     - name: Notify Success on Telegram
       if: ${{ steps.deploy.conclusion == 'success' }}
-      uses: appleboy/telegram-action@0.0.3
+      uses: appleboy/telegram-action@master
       with:
         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         to: ${{ secrets.TELEGRAM_CHAT_ID }}
         message: ✔️ Deploy succeeded
     - name: Notify Failure on Telegram
       if: ${{ steps.deploy.conclusion != 'success' }}
-      uses: appleboy/telegram-action@0.0.3
+      uses: appleboy/telegram-action@master
       with:
         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         to: ${{ secrets.TELEGRAM_CHAT_ID }}
