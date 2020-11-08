@@ -47,6 +47,9 @@ jobs:
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/goflex'
       
+    - name: debug
+      run: echo '${{ steps.deploy.conclusion }}'  
+      
     - name: Notify Success on Telegram
       if: ${{ steps.deploy.conclusion == 'success' }}
       uses: appleboy/telegram-action@master
@@ -62,4 +65,3 @@ jobs:
         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         to: ${{ secrets.TELEGRAM_CHAT_ID }}
         message: ❌ Deploy failed. See the details at https://github.com/shepshook/GoFlex/actions/runs/${{ github.run_id }}
-
