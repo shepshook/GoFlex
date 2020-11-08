@@ -10,24 +10,33 @@ env:
 
 jobs:
 
-  build-and-test:
+  build-test-deploy:
     
-    name: Build and test
+    name: Build, test and deploy to Azure
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@master
+      
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
+        
     - name: Install dependencies
       run: dotnet restore
+      
     - name: Build
       run: dotnet build --configuration Release --no-restore
+      
     - name: Test
       id: test
       run: dotnet test --no-restore --verbosity normal
+      
+    - name: Publish
+      if: ${{ steps.test.conclusion == 'success' }}
+      id: publish
+      run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/goflex' 
       
     - name: Deploy to Azure WebApp
       if: ${{ steps.test.conclusion == 'success' }}
@@ -36,7 +45,8 @@ jobs:
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/goflex'
+      
     - name: Notify Success on Telegram
       if: ${{ steps.deploy.conclusion == 'success' }}
       uses: appleboy/telegram-action@master
@@ -44,6 +54,7 @@ jobs:
         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         to: ${{ secrets.TELEGRAM_CHAT_ID }}
         message: ✅ Deploy succeeded. See the details at https://github.com/shepshook/GoFlex/actions/runs/${{ github.run_id }}
+        
     - name: Notify Failure on Telegram
       if: ${{ steps.deploy.conclusion != 'success' }}
       uses: appleboy/telegram-action@master
