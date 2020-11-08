@@ -14,7 +14,6 @@ using Stripe.Checkout;
 namespace GoFlex.Web.Areas.Api
 {
     [Area("Api")]
-    [Authorize]
     [ApiController]
     public class PaymentController : ControllerBase
     {
@@ -29,6 +28,7 @@ namespace GoFlex.Web.Areas.Api
             _logger = logger.ForContext<PaymentController>();
         }
 
+        [Authorize]
         [HttpPost("[area]/[controller]/[action]/{id:int}")]
         public ActionResult Create(int id, string returnUrl = null)
         {
