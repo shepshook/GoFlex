@@ -4,9 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GoFlex.Core.Repositories.Abstractions;
+using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using MimeKit;
+using QRCoder;
 using Serilog;
 using Stripe;
 using Stripe.Checkout;
@@ -20,12 +23,14 @@ namespace GoFlex.Web.Areas.Api
         private readonly string _webhookSecret;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
+        private readonly IConfiguration _configuration;
 
         public PaymentController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger logger)
         {
             _unitOfWork = unitOfWork;
             _webhookSecret = configuration["Stripe:WebhookSecret"];
             _logger = logger.ForContext<PaymentController>();
+            _configuration = configuration;
         }
 
         [Authorize]
@@ -35,8 +40,9 @@ namespace GoFlex.Web.Areas.Api
             var host = Request.Scheme + Uri.SchemeDelimiter + Request.Host;
 
             var order = _unitOfWork.OrderRepository.Get(id);
+            var user = _unitOfWork.UserRepository.Get(Guid.Parse(User.FindFirst("userId").Value));
 
-            if (order == null || User.FindFirst("userId").Value != order.UserId.ToString())
+            if (order == null || user.Id != order.UserId)
                 return NotFound();
 
             var options = new SessionCreateOptions
@@ -61,7 +67,8 @@ namespace GoFlex.Web.Areas.Api
                 }).ToList(),
                 Mode = "payment",
                 SuccessUrl = host + Url.Action("Success", "Order"),
-                CancelUrl = host + Url.Action("Cancel", "Order")
+                CancelUrl = host + Url.Action("Cancel", "Order"),
+                CustomerEmail = user.Email
             };
 
             var service = new SessionService();
@@ -137,9 +144,31 @@ namespace GoFlex.Web.Areas.Api
             //todo: an idea to generate a !unique! QR code that can be then verified by our api
             var id = int.Parse(session.Metadata["OrderId"]);
             var order = _unitOfWork.OrderRepository.Get(id);
-            var email = session.Customer.Email;
+            var emailReceiver = session.Customer.Email;
+            _logger.Here().Information("Payment for order {Id} received from {Email}", order.Id, emailReceiver);
 
-            _logger.Here().Information("Payment for order {@Order} received from {Email}", order, email);
+            var payload = new PayloadGenerator.Url(Request.Scheme + "://" + Request.Host.ToUriComponent() + Url.Action("List", "Event"));
+            var asciiQr = new AsciiQRCode(new QRCodeGenerator().CreateQrCode(payload));
+
+            var message = new MimeMessage
+            {
+                Subject = "Your order from GoFlex",
+                Body = new TextPart(MimeKit.Text.TextFormat.Text)
+                {
+                    Text = asciiQr.GetGraphic(20)
+                }
+            };
+
+            message.From.Add(new MailboxAddress("Self", _configuration["MailKit:Email"]));
+            message.To.Add(new MailboxAddress("Self", emailReceiver));
+
+            using var client = new SmtpClient();
+            client.Connect(_configuration["MailKit:SmtpServer"], int.Parse(_configuration["MailKit:Port"]), true);
+            client.Authenticate(_configuration["MailKit:Email"], _configuration["MailKit:Password"]);
+            client.Send(message);
+            client.Disconnect(true);
+
+            _logger.Here().Information("Mail sent to {Email}", emailReceiver);
         }
 
         private void NotifyCustomer(Session session)
