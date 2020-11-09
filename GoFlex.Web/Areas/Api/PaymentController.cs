@@ -85,7 +85,7 @@ namespace GoFlex.Web.Areas.Api
             {
                 var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], _webhookSecret);
 
-                _logger.Here().Information("Webhook activated for event {@Event}", stripeEvent);
+                _logger.Here().Information("Webhook activated for {@Event}", stripeEvent);
 
                 Session session;
 
@@ -106,11 +106,15 @@ namespace GoFlex.Web.Areas.Api
                         session = ExpandAsSession(stripeEvent);
                         NotifyCustomer(session);
                         break;
+
+                    default:
+                        _logger.Here().Warning("Webhook event type {Type} is not supported: {@Event}", stripeEvent.Type, stripeEvent);
+                        return BadRequest();
                 }
             }
             catch (StripeException e)
             {
-                //todo: log an attempt of payment faking
+                _logger.Here().Warning("Webhook caused an {@Exception}", e);
                 return BadRequest();
             }
             return Ok();
