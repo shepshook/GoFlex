@@ -96,14 +96,15 @@ namespace GoFlex.Web.Services
         {
             var payload = new PayloadGenerator.Url(url);
             var qrCode = new BitmapByteQRCode(_qrGenerator.CreateQrCode(payload));
-            var bytes = qrCode.GetGraphic(5);
+            var bytes = qrCode.GetGraphic(3);
 
             return bytes;
         }
 
         private string GetTicketHtml(EventPrice item, string imageId)
         {
-            return $"<table>" +
+            return $"<hr/>" +
+                   $"<table>" +
                    $"   <tr>" +
                    $"       <td style=\"width: 70%\"><h2>{item.Event.Name} - {item.Name}</h2></td>" +
                    $"       <td rowspan=\"3\"><img src=\"cid:{imageId}\"/></td>" +
@@ -111,7 +112,7 @@ namespace GoFlex.Web.Services
                    $"   <tr><td><h4>At: {item.Event.Location.Name}</h5></td></tr>" +
                    $"   <tr><td><h4>On: {item.Event.ShortDateTime}</h4></td></tr>" +
                    $"</table>" +
-                   $"<hl/>";
+                   $"<hr/>";
         }
     }
 }
