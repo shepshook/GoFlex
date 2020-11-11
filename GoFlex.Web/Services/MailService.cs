@@ -1,4 +1,7 @@
 ﻿using System;
+using Azure.Core;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories.Abstractions;
 using GoFlex.Web.Services.Abstractions;
@@ -9,7 +12,6 @@ using MimeKit;
 using MimeKit.Utils;
 using QRCoder;
 using Serilog;
-using Session = Stripe.Checkout.Session;
 
 namespace GoFlex.Web.Services
 {
@@ -19,6 +21,7 @@ namespace GoFlex.Web.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
         private readonly QRCodeGenerator _qrGenerator;
+        private readonly SecretClient _secretClient;
 
         public MailService(IConfiguration configuration, IUnitOfWork unitOfWork, ILogger logger)
         {
@@ -26,6 +29,19 @@ namespace GoFlex.Web.Services
             _unitOfWork = unitOfWork;
             _logger = logger;
             _qrGenerator = new QRCodeGenerator();
+
+            var options = new SecretClientOptions
+            {
+                Retry =
+                {
+                    Delay= TimeSpan.FromSeconds(2),
+                    MaxDelay = TimeSpan.FromSeconds(16),
+                    MaxRetries = 5,
+                    Mode = RetryMode.Exponential
+                }
+            };
+
+            _secretClient = new SecretClient(new Uri("https://goflexsecrets.vault.azure.net/"), new DefaultAzureCredential(), options);
         }
 
         public void SendOrder(Order order, string requestBase, IUrlHelper url)
@@ -35,7 +51,7 @@ namespace GoFlex.Web.Services
             {
                 using var client = new SmtpClient();
                 client.Connect(_configuration["MailKit:SmtpServer"], int.Parse(_configuration["MailKit:Port"]), true);
-                client.Authenticate(_configuration["MailKit:Email"], _configuration["MailKit:Password"]);
+                client.Authenticate(_configuration["MailKit:Email"], _secretClient.GetSecret("EmailPassword").Value.Value);
                 client.Send(message);
                 client.Disconnect(true);
             }
@@ -55,7 +71,7 @@ namespace GoFlex.Web.Services
             };
 
             message.From.Add(new MailboxAddress("GoFlex", _configuration["MailKit:Email"]));
-            message.To.Add(new MailboxAddress(order.User.Email, "nikitashepshuk@gmail.com"));
+            message.To.Add(new MailboxAddress(order.User.Email, order.User.Email));
 
             var builder = new BodyBuilder();
             foreach (var item in order.Items)
