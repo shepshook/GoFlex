@@ -1,0 +1,20 @@
+﻿@model GoFlex.ViewModels.TicketApproveViewModel
+
+@{
+    Layout = "_MainLayout";
+}
+
+@if (Model.Approved)
+{
+    <div class="jumbotron bg-success">
+        <h2>Ticket approved!</h2>
+        <p>Event: @Model.EventPrice.Event.Name</p>
+        <p>Category: @Model.EventPrice.Name</p>
+    </div>
+}
+else
+{
+    <div class="jumbotron bg-danger">
+        <h2>Ticket was not found or it has been already used</h2>
+    </div>
+}

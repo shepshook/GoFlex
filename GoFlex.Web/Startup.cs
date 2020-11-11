@@ -39,6 +39,7 @@ namespace GoFlex.Web
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IEventService, Services.EventService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IMailService, MailService>();
 
             var outputTemplate = "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message}{NewLine}in method {MemberName} at {FilePath}:{LineNumber}{NewLine}{Exception}{NewLine}";
             services.AddScoped<ILogger>(x =>

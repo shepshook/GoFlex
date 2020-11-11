@@ -168,5 +168,11 @@ namespace GoFlex.Web.Controllers
             model = _eventService.GetSingle(id);
             return View("EditEvent", model);
         }
+
+        [Route("[controller]/{id:guid}")]
+        public IActionResult ConfirmTicket(Guid id)
+        {
+            return View("TicketApproved", _eventService.ApproveTicket(id));
+        }
     }
 }

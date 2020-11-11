@@ -37,6 +37,7 @@ namespace GoFlex.Infrastructure.Repositories
         private IQueryable<Order> MakeInclusions() =>
             dbSet.Include(x => x.User)
                 .Include(x => x.Event)
-                .Include(x => x.Items.Select(item => item.EventPrice));
+                .Include(x => x.Items.Select(item => item.EventPrice))
+                .Include(x => x.Items.Select(item => item.Secrets));
     }
 }

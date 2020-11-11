@@ -12,6 +12,7 @@ namespace GoFlex.Core.Repositories.Abstractions
         IRoleRepository RoleRepository { get; }
         IUserRepository UserRepository { get; }
         ICityRepository CityRepository { get; }
+        IOrderItemSecretRepository OrderItemSecretRepository { get; }
 
         void Commit();
     }

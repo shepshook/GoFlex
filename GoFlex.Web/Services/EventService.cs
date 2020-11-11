@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories.Abstractions;
+using GoFlex.ViewModels;
 using GoFlex.Web.Services.Abstractions;
 using GoFlex.Web.ViewModels;
 
@@ -162,6 +163,24 @@ namespace GoFlex.Web.Services
             _unitOfWork.Commit();
 
             return true;
+        }
+
+        public TicketApproveViewModel ApproveTicket(Guid id)
+        {
+            var secret = _unitOfWork.OrderItemSecretRepository.Get(id);
+            if (secret == null || secret.IsUsed)
+                return new TicketApproveViewModel {Approved = false};
+
+            secret.IsUsed = true;
+            _unitOfWork.Commit();
+
+            var eventPrice = _unitOfWork.EventPriceRepository.Get(secret.OrderItem.EventPriceId);
+
+            return new TicketApproveViewModel
+            {
+                Approved = true,
+                EventPrice = eventPrice
+            };
         }
 
         private EventEditViewModel BuildModelFromEntity(Event e)

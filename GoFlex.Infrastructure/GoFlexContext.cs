@@ -24,6 +24,7 @@ namespace GoFlex.Infrastructure
             builder.Configurations.Add(new RoleMap());
             builder.Configurations.Add(new UserMap());
             builder.Configurations.Add(new CityMap());
+            builder.Configurations.Add(new OrderItemSecretMap());
         }
     }
 }

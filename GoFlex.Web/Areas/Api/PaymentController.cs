@@ -3,16 +3,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories.Abstractions;
+using GoFlex.Web.Services.Abstractions;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
+using MimeKit.Utils;
 using QRCoder;
 using Serilog;
 using Stripe;
 using Stripe.Checkout;
+using ContentType = System.Net.Mime.ContentType;
 
 namespace GoFlex.Web.Areas.Api
 {
@@ -24,13 +28,15 @@ namespace GoFlex.Web.Areas.Api
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
+        private readonly IMailService _mailService;
 
-        public PaymentController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger logger)
+        public PaymentController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger logger, IMailService mailService)
         {
             _unitOfWork = unitOfWork;
             _webhookSecret = configuration["Stripe:WebhookSecret"];
             _logger = logger.ForContext<PaymentController>();
             _configuration = configuration;
+            _mailService = mailService;
         }
 
         [Authorize]
@@ -83,8 +89,8 @@ namespace GoFlex.Web.Areas.Api
             return new JsonResult(new {id = session.Id});
         }
 
-        [HttpPost("webhook")]
-        public async Task<IActionResult> Complete()
+        [HttpPost("api/[action]")]
+        public async Task<IActionResult> Webhook()
         {
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
 
@@ -124,6 +130,7 @@ namespace GoFlex.Web.Areas.Api
                 _logger.Here().Warning("Webhook caused an {@Exception}", e);
                 return BadRequest();
             }
+
             return Ok();
         }
 
@@ -144,31 +151,29 @@ namespace GoFlex.Web.Areas.Api
             //todo: an idea to generate a !unique! QR code that can be then verified by our api
             var id = int.Parse(session.Metadata["OrderId"]);
             var order = _unitOfWork.OrderRepository.Get(id);
-            var emailReceiver = session.Customer.Email;
+            var emailReceiver = order.User.Email;
+
             _logger.Here().Information("Payment for order {Id} received from {Email}", order.Id, emailReceiver);
 
-            var payload = new PayloadGenerator.Url(Request.Scheme + "://" + Request.Host.ToUriComponent() + Url.Action("List", "Event"));
-            var asciiQr = new AsciiQRCode(new QRCodeGenerator().CreateQrCode(payload));
-
-            var message = new MimeMessage
+            foreach (var item in order.Items)
             {
-                Subject = "Your order from GoFlex",
-                Body = new TextPart(MimeKit.Text.TextFormat.Text)
+                foreach (var _ in Enumerable.Range(0, item.Quantity))
                 {
-                    Text = asciiQr.GetGraphic(20)
+                    var secret = new OrderItemSecret
+                    {
+                        OrderItemId = item.Id,
+                        Id = Guid.NewGuid(),
+                        IsUsed = false
+                    };
+                    _unitOfWork.OrderItemSecretRepository.Insert(secret);
                 }
-            };
+            }
+            _unitOfWork.Commit();
 
-            message.From.Add(new MailboxAddress("Self", _configuration["MailKit:Email"]));
-            message.To.Add(new MailboxAddress("Self", emailReceiver));
+            var path = Request.Scheme + "://" + Request.Host.ToUriComponent();
+            order = _unitOfWork.OrderRepository.Get(id);
 
-            using var client = new SmtpClient();
-            client.Connect(_configuration["MailKit:SmtpServer"], int.Parse(_configuration["MailKit:Port"]), true);
-            client.Authenticate(_configuration["MailKit:Email"], _configuration["MailKit:Password"]);
-            client.Send(message);
-            client.Disconnect(true);
-
-            _logger.Here().Information("Mail sent to {Email}", emailReceiver);
+            _mailService.SendOrder(order, path, Url);
         }
 
         private void NotifyCustomer(Session session)

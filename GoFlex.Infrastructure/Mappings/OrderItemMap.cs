@@ -9,7 +9,8 @@ namespace GoFlex.Infrastructure.Mappings
         {
             ToTable("OrderItem");
 
-            HasKey(x => new {x.OrderId, x.EventPriceId});
+            HasKey(x => x.Id);
+            Property(x => x.Id).HasColumnName("OrderItemId");
 
             Property(x => x.OrderId).IsRequired();
             Property(x => x.EventPriceId).IsRequired();

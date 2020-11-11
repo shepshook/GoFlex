@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GoFlex.Core.Entities;
+using GoFlex.ViewModels;
 using GoFlex.Web.ViewModels;
 
 namespace GoFlex.Web.Services.Abstractions
@@ -27,5 +29,7 @@ namespace GoFlex.Web.Services.Abstractions
         public EventEditViewModel ActualizeModel(EventEditViewModel model = null);
 
         public bool AcceptEvent(int id, bool vote);
+
+        public TicketApproveViewModel ApproveTicket(Guid id);
     }
 }
