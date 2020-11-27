@@ -35,7 +35,7 @@
                 @if (!User.Identity.IsAuthenticated)
                 {
                     <div>
-                        <a class="btn btn-outline-info" asp-action="SignUp" asp-controller="Auth" asp-route-returnUrl="@returnUrl">Sign Up</a>
+                        <a class="btn btn-outline-secondary" asp-action="SignUp" asp-controller="Auth" asp-route-returnUrl="@returnUrl">Sign Up</a>
                         <a class="btn btn-outline-secondary" asp-action="Login" asp-controller="Auth" asp-route-returnUrl="@returnUrl">Log In</a>
                     </div>
                 }

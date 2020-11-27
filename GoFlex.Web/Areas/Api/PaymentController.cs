@@ -147,8 +147,6 @@ namespace GoFlex.Web.Areas.Api
 
         private void CompleteOrder(Session session)
         {
-            //todo: compose an email message and send it to the customer
-            //todo: an idea to generate a !unique! QR code that can be then verified by our api
             var id = int.Parse(session.Metadata["OrderId"]);
             var order = _unitOfWork.OrderRepository.Get(id);
             var emailReceiver = order.User.Email;

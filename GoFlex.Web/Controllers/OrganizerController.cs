@@ -1,4 +1,5 @@
 ﻿using System;
+using GoFlex.ViewModels;
 using GoFlex.Web.Services.Abstractions;
 using GoFlex.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -172,7 +173,13 @@ namespace GoFlex.Web.Controllers
         [Route("[controller]/{id:guid}")]
         public IActionResult ConfirmTicket(Guid id)
         {
-            return View("TicketApproved", _eventService.ApproveTicket(id));
+            var model = _eventService.ApproveTicket(id);
+
+            var userId = Guid.Parse(User.FindFirst("userId").Value);
+            if (model.EventPrice.Event.OrganizerId != userId)
+                model = new TicketApproveViewModel {Approved = false};
+
+            return View("TicketApproved", model);
         }
     }
 }
