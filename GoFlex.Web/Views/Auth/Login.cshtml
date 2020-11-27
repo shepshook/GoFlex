@@ -22,10 +22,10 @@
                     <p class="text-danger">@Model</p>
                 }
                 @Html.ValidationSummary(false)
-                <input type="submit" value="Login" class="btn btn-primary"/>
+                <input type="submit" value="Login" class="btn btn-primary mr-2" />
                 <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl"/>
             </form>
         </div>
-        <a class="btn btn-outline-primary" asp-controller="Auth" asp-action="SignUp" asp-route-returnUrl="@ViewBag.ReturnUrl">Sign Up</a>
+        <span>Or <a asp-controller="Auth" asp-action="SignUp" asp-route-returnUrl="@ViewBag.ReturnUrl">sign up</a> first</span>
     </div>
 </div>
