@@ -6,6 +6,6 @@ namespace GoFlex.ViewModels
     {
         public bool Approved { get; set; }
 
-        public EventPrice EventPrice { get; set; }
+        public Ticket EventPrice { get; set; }
     }
 }

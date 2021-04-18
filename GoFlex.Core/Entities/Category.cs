@@ -1,6 +1,6 @@
 ﻿namespace GoFlex.Core.Entities
 {
-    public class EventCategory : Entity<int>
+    public class Category : Entity<int>
     {
         public string Name { get; set; }
     }

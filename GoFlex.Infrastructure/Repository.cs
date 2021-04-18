@@ -1,17 +1,16 @@
-﻿using System.Data.Entity;
-using GoFlex.Core;
+﻿using GoFlex.Core;
 
 namespace GoFlex.Infrastructure
 {
     internal abstract class Repository<TEntity> where TEntity : Entity
     {
-        protected readonly GoFlexContext context;
-        protected readonly DbSet<TEntity> dbSet;
+        protected readonly Database _database;
+        protected readonly UnitOfWork _unitOfWork;
 
-        protected Repository(GoFlexContext context)
+        protected Repository(Database database, UnitOfWork unitOfWork)
         {
-            this.context = context;
-            dbSet = context.Set<TEntity>();
+            _unitOfWork = unitOfWork;
+            _database = database;
         }
     }
 }

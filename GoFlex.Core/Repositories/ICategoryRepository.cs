@@ -3,7 +3,7 @@ using GoFlex.Core.Repositories.Abstractions;
 
 namespace GoFlex.Core.Repositories
 {
-    public interface ICityRepository : IRepository<City, int>
+    public interface ICategoryRepository : IRepository<Category, int>
     {
     }
 }

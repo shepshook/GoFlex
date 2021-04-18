@@ -16,10 +16,10 @@ namespace GoFlex.Core.Entities
         public int LocationId { get; set; }
         public Guid OrganizerId { get; set; }
 
-        public virtual EventCategory EventCategory { get; set; }
+        public virtual Category Category { get; set; }
         public virtual Location Location { get; set; }
         public virtual User Organizer { get; set; }
-        public virtual ICollection<EventPrice> Prices { get; set; }
+        public virtual ICollection<Ticket> Prices { get; set; }
 
         public string ShortDate => DateTime.ToString("d.MM.yyyy");
         public string ShortDateTime => DateTime.ToString("dddd, d.MM.yyy, H:mm");

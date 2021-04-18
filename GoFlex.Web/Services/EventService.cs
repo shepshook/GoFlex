@@ -74,7 +74,7 @@ namespace GoFlex.Web.Services
 
         public void AddPrice(int id, EventPriceViewModel model)
         {
-            var price = new EventPrice
+            var price = new Ticket
             {
                 Name = model.Name,
                 Total = model.Total,
@@ -100,7 +100,7 @@ namespace GoFlex.Web.Services
 
             if (model.Price != price.Price)
             {
-                var newPrice = new EventPrice
+                var newPrice = new Ticket
                 {
                     Name = model.Name,
                     Total = price.Total - price.Sold,

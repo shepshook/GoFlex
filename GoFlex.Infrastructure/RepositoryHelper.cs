@@ -30,5 +30,12 @@ namespace GoFlex.Infrastructure
 
             return query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
         }
+
+        internal static IDictionary<string, object> ToDictionary(this object entity)
+        {
+            return entity?.GetType().GetProperties()
+                .Where(prop => prop.GetType().IsValueType || prop.GetType() == typeof(string))
+                .ToDictionary(prop => prop.Name, prop => prop.GetValue(entity));
+        }
     }
 }

@@ -8,6 +8,6 @@ namespace GoFlex.Web.ViewModels
         public IEnumerable<Event> Events { get; set; }
         public PageViewModel Page { get; set; }
 
-        public IEnumerable<EventCategory> EventCategories { get; set; }
+        public IEnumerable<Category> EventCategories { get; set; }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Core;
-using System.Linq;
-using System.Linq.Expressions;
+using System.Threading.Tasks;
 using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories;
 
@@ -10,28 +8,36 @@ namespace GoFlex.Infrastructure.Repositories
 {
     internal sealed class UserRepository : Repository<User>, IUserRepository
     {
-        public UserRepository(GoFlexContext context) : base(context)
+        public UserRepository(Database db, UnitOfWork uow) : base(db, uow)
         {
         }
 
-        public User Get(Guid key) => dbSet.Find(key);
-
-        public IEnumerable<User> All(params Expression<Func<User, bool>>[] predicates)
+        public Task<User> GetAsync(Guid key)
         {
-            var query = dbSet.AsQueryable().ApplyPredicates(predicates);
-
-            return query.ToList();
+            return _database.ReadEntityAsync<User>("usp_UserSelect", key);
         }
 
-        public void Insert(User entity)
+        public Task<IEnumerable<User>> GetAllAsync(IDictionary<string, object> parameters = null)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            entity.Id = Guid.NewGuid();
-            dbSet.Add(entity);
+            return _database.ReadEntitiesAsync<User>("", parameters);
         }
 
-        public void Remove(Guid key) => dbSet.Remove(dbSet.Find(key) ?? throw new ObjectNotFoundException());
+        public async Task UpdateAsync(User entity)
+        {
+            await _database.UpdateEntityAsync("usp_UserUpdate", entity);
+        }
+
+        public async Task InsertAsync(User entity)
+        {
+            if (await GetAsync(entity.Id) != null)
+                await UpdateAsync(entity);
+
+            await _database.CreateEntityAsync("usp_UserInsert", entity);
+        }
+
+        public async Task RemoveAsync(Guid key)
+        {
+            await _database.RemoveEntityAsync("usp_UserDelete", key);
+        }
     }
 }

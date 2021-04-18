@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Core;
-using System.Linq;
-using System.Linq.Expressions;
+using System.Threading.Tasks;
 using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories;
 
@@ -10,30 +8,36 @@ namespace GoFlex.Infrastructure.Repositories
 {
     internal sealed class RoleRepository : Repository<Role>, IRoleRepository
     {
-        public RoleRepository(GoFlexContext context) : base(context)
+        public RoleRepository(Database db, UnitOfWork uow) : base(db, uow)
         {
         }
 
-        public Role Get(int key) => dbSet.Find(key);
-
-        public IEnumerable<Role> All(params Expression<Func<Role, bool>>[] predicates)
+        public Task<Role> GetAsync(int key)
         {
-            var query = dbSet.AsQueryable().ApplyPredicates(predicates);
-
-            return query.ToList();
+            return _database.ReadEntityAsync<Role>("usp_RoleSelect", key);
         }
 
-        public void Insert(Role entity)
+        public Task<IEnumerable<Role>> GetAllAsync(IDictionary<string, object> parameters = null)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            dbSet.Add(entity);
+            return _database.ReadEntitiesAsync<Role>("", parameters);
         }
 
-        public void Remove(int key)
+        public async Task UpdateAsync(Role entity)
         {
-            dbSet.Remove(dbSet.Find(key) ?? throw new ObjectNotFoundException());
+            await _database.UpdateEntityAsync("usp_RoleUpdate", entity);
+        }
+
+        public async Task InsertAsync(Role entity)
+        {
+            if (await GetAsync(entity.Id) != null)
+                await UpdateAsync(entity);
+
+            await _database.CreateEntityAsync("usp_RoleInsert", entity);
+        }
+
+        public async Task RemoveAsync(int key)
+        {
+            await _database.RemoveEntityAsync("usp_RoleDelete", key);
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace GoFlex.Core.Entities
 {
-    public class EventPrice : Entity<int>
+    public class Ticket : Entity<int>
     {
         public string Name { get; set; }
         public decimal Price { get; set; }

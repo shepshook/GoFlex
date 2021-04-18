@@ -41,7 +41,7 @@ namespace GoFlex.Web.ViewModels
         public EventPriceViewModel CurrentPrice { get; set; }
 
         public IEnumerable<EventPriceViewModel> Prices { get; set; }
-        public IEnumerable<EventCategory> Categories { get; set; }
+        public IEnumerable<Category> Categories { get; set; }
         public IEnumerable<Location> Locations { get; set; }
     }
 }

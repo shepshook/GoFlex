@@ -30,7 +30,7 @@ namespace GoFlex.Web.Controllers
             var order = new Order
             {
                 Items = new List<OrderItem>(Enumerable
-                    .Zip(id, count, (a, b) => new OrderItem {EventPriceId = a, Quantity = b ?? 0})
+                    .Zip(id, count, (a, b) => new OrderItem {TicketId = a, Quantity = b ?? 0})
                     .Where(x => x.Quantity != 0)),
                 Timestamp = DateTime.Now
             };
@@ -38,7 +38,7 @@ namespace GoFlex.Web.Controllers
             if (!order.Items.Any())
                 return BadRequest();
 
-            order.Event = _unitOfWork.EventPriceRepository.Get(order.Items.First().EventPriceId).Event;
+            order.Event = _unitOfWork.EventPriceRepository.Get(order.Items.First().TicketId).Event;
 
             order.UserId = Guid.Parse(User.FindFirst("userId").Value);
 

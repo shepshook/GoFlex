@@ -78,12 +78,12 @@ namespace GoFlex.Web.Services
             {
                 foreach (var secret in item.Secrets)
                 {
-                    var image = builder.LinkedResources.Add($"{item.EventPrice.Name}",
+                    var image = builder.LinkedResources.Add($"{item.Ticket.Name}",
                         GetQrCodeBytes(requestBase + url.Action("ConfirmTicket", "Organizer", new {id = secret.Id})));
 
                     image.ContentId = MimeUtils.GenerateMessageId();
 
-                    builder.HtmlBody += GetTicketHtml(item.EventPrice, image.ContentId);
+                    builder.HtmlBody += GetTicketHtml(item.Ticket, image.ContentId);
                 }
             }
 
@@ -101,7 +101,7 @@ namespace GoFlex.Web.Services
             return bytes;
         }
 
-        private string GetTicketHtml(EventPrice item, string imageId)
+        private string GetTicketHtml(Ticket item, string imageId)
         {
             return $"<hr/>" +
                    $"<table>" +

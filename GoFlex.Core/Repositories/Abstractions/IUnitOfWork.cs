@@ -2,18 +2,17 @@
 
 namespace GoFlex.Core.Repositories.Abstractions
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork
     {
         IEventRepository EventRepository { get; }
-        IEventCategoryRepository EventCategoryRepository { get; }
-        IEventPriceRepository EventPriceRepository { get; }
+        ICategoryRepository EventCategoryRepository { get; }
+        ITicketRepository EventPriceRepository { get; }
         ILocationRepository LocationRepository { get; }
         IOrderRepository OrderRepository { get; }
         IRoleRepository RoleRepository { get; }
         IUserRepository UserRepository { get; }
-        ICityRepository CityRepository { get; }
-        IOrderItemSecretRepository OrderItemSecretRepository { get; }
-
-        void Commit();
+        ICommentRepository CommentRepository { get; }
+        IOrganizerRepository OrganizerRepository { get; }
+        IOrderItemRepository OrderItemRepository { get; }
     }
 }
