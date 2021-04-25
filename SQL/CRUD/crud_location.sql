@@ -7,16 +7,33 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_LocationSelect] 
-    @LocationId int
+    @Id int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
 
 	BEGIN TRAN
 
-	SELECT [LocationId], [Name], [Address], [PhoneNumber], [Photo] 
+	SELECT [LocationId] as Id, [Name], [Address], [PhoneNumber], [Photo] 
 	FROM   [dbo].[Location] 
-	WHERE  ([LocationId] = @LocationId OR @LocationId IS NULL) 
+	WHERE  ([LocationId] = @Id OR @Id IS NULL) 
+
+	COMMIT
+GO
+IF OBJECT_ID('[dbo].[usp_LocationSelectList]') IS NOT NULL
+BEGIN 
+    DROP PROC [dbo].[usp_LocationSelectList] 
+END 
+GO
+CREATE PROC [dbo].[usp_LocationSelectList] 
+AS 
+	SET NOCOUNT ON 
+	SET XACT_ABORT ON  
+
+	BEGIN TRAN
+
+	SELECT [LocationId] as Id, [Name], [Address], [PhoneNumber], [Photo] 
+	FROM   [dbo].[Location] 
 
 	COMMIT
 GO
@@ -39,7 +56,7 @@ AS
 	INSERT INTO [dbo].[Location] ([Name], [Address], [PhoneNumber], [Photo])
 	SELECT @Name, @Address, @PhoneNumber, @Photo
 	
-	SELECT [LocationId], [Name], [Address], [PhoneNumber], [Photo]
+	SELECT [LocationId] as Id, [Name], [Address], [PhoneNumber], [Photo]
 	FROM   [dbo].[Location]
 	WHERE  [LocationId] = SCOPE_IDENTITY()
                
@@ -51,7 +68,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_LocationUpdate] 
-    @LocationId int,
+    @Id int,
     @Name nvarchar(256),
     @Address nvarchar(512),
     @PhoneNumber varchar(15),
@@ -64,12 +81,12 @@ AS
 
 	UPDATE [dbo].[Location]
 	SET    [Name] = @Name, [Address] = @Address, [PhoneNumber] = @PhoneNumber, [Photo] = @Photo
-	WHERE  [LocationId] = @LocationId
+	WHERE  [LocationId] = @Id
 	
 
-	SELECT [LocationId], [Name], [Address], [PhoneNumber], [Photo]
+	SELECT [LocationId] as Id, [Name], [Address], [PhoneNumber], [Photo]
 	FROM   [dbo].[Location]
-	WHERE  [LocationId] = @LocationId	
+	WHERE  [LocationId] = @Id	
 	
 
 	COMMIT
@@ -80,7 +97,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_LocationDelete] 
-    @LocationId int
+    @Id int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -89,7 +106,7 @@ AS
 
 	DELETE
 	FROM   [dbo].[Location]
-	WHERE  [LocationId] = @LocationId
+	WHERE  [LocationId] = @Id
 
 	COMMIT
 GO

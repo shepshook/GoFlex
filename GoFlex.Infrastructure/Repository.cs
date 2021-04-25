@@ -2,7 +2,7 @@
 
 namespace GoFlex.Infrastructure
 {
-    internal abstract class Repository<TEntity> where TEntity : Entity
+    public abstract class Repository<TEntity> where TEntity : Entity
     {
         protected readonly Database _database;
         protected readonly UnitOfWork _unitOfWork;

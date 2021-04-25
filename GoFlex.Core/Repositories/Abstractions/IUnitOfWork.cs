@@ -1,15 +1,12 @@
-﻿using System;
-
-namespace GoFlex.Core.Repositories.Abstractions
+﻿namespace GoFlex.Core.Repositories.Abstractions
 {
     public interface IUnitOfWork
     {
         IEventRepository EventRepository { get; }
-        ICategoryRepository EventCategoryRepository { get; }
-        ITicketRepository EventPriceRepository { get; }
+        ICategoryRepository CategoryRepository { get; }
+        ITicketRepository TicketRepository { get; }
         ILocationRepository LocationRepository { get; }
         IOrderRepository OrderRepository { get; }
-        IRoleRepository RoleRepository { get; }
         IUserRepository UserRepository { get; }
         ICommentRepository CommentRepository { get; }
         IOrganizerRepository OrganizerRepository { get; }

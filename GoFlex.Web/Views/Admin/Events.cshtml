@@ -10,10 +10,10 @@
         <form method="get" style="width: 40%" class="mr-4" asp-action="Details" asp-controller="Event" asp-route-id="@item.Id">
             <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
             <h4 class="mb-2" asp-action="EditEvent">@item.Name</h4>
-            <span class="text-muted small">@item.EventCategory.Name</span>
+            <span class="text-muted small">@item.Category.Name</span>
         </form>
         <div>
-            <p class="mb-1">On @item.ShortDate</p>
+            <p class="mb-1">On @item.ShortDate()</p>
             <span>At @item.Location.Name</span>
         </div>
         <div class="ml-auto flex-row d-flex">

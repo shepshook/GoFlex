@@ -18,20 +18,22 @@ namespace GoFlex.Infrastructure.Repositories
 
         public Task<IEnumerable<Category>> GetAllAsync(IDictionary<string, object> parameters = null)
         {
-            return _database.ReadEntitiesAsync<Category>("", parameters);
+            return _database.ReadEntitiesAsync<Category>("usp_CategorySelectList", parameters);
         }
 
-        public async Task UpdateAsync(Category entity)
+        public Task<Category> UpdateAsync(Category entity)
         {
-            await _database.UpdateEntityAsync("usp_CategoryUpdate", entity);
+            return _database.UpdateEntityAsync("usp_CategoryUpdate", entity);
         }
 
-        public async Task InsertAsync(Category entity)
+        public async Task<Category> InsertAsync(Category entity)
         {
-            if (await GetAsync(entity.Id) != null)
-                await UpdateAsync(entity);
+            if (entity.Id != default && await GetAsync(entity.Id) != null)
+            {
+                return await UpdateAsync(entity);
+            }
 
-            await _database.CreateEntityAsync("usp_CategoryInsert", entity);
+            return await _database.CreateEntityAsync("usp_CategoryInsert", entity);
         }
 
         public async Task RemoveAsync(int key)

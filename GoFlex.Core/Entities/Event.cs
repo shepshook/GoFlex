@@ -12,17 +12,18 @@ namespace GoFlex.Core.Entities
         public string Photo { get; set; }
         public bool? IsApproved { get; set; }
 
-        public int EventCategoryId { get; set; }
+        public int CategoryId { get; set; }
         public int LocationId { get; set; }
         public Guid OrganizerId { get; set; }
 
-        public virtual Category Category { get; set; }
-        public virtual Location Location { get; set; }
-        public virtual User Organizer { get; set; }
-        public virtual ICollection<Ticket> Prices { get; set; }
+        public Category Category { get; set; }
+        public Location Location { get; set; }
+        public User Organizer { get; set; }
+        public ICollection<Ticket> Tickets { get; set; }
+        public IList<Comment> RootComments { get; set; }
 
-        public string ShortDate => DateTime.ToString("d.MM.yyyy");
-        public string ShortDateTime => DateTime.ToString("dddd, d.MM.yyy, H:mm");
-        public bool IsNew => (DateTime.Now - CreateTime).Days <= 70;
+        public string ShortDate() => DateTime.ToString("d.MM.yyyy");
+        public string ShortDateTime() => DateTime.ToString("dddd, d.MM.yyy, H:mm");
+        public bool IsNew() => (DateTime.Now - CreateTime).Days <= 70;
     }
 }

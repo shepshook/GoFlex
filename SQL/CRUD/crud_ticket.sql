@@ -7,16 +7,33 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_TicketSelect] 
-    @EventPriceId int
+    @Id int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
 
 	BEGIN TRAN
 
-	SELECT [EventPriceId], [Name], [Price], [EventId], [TotalCount] 
+	SELECT [TicketId] as Id, [Name], [Price], [EventId], [TotalCount], [IsRemoved]
 	FROM   [dbo].[Ticket] 
-	WHERE  ([EventPriceId] = @EventPriceId OR @EventPriceId IS NULL) 
+	WHERE  ([TicketId] = @Id OR @Id IS NULL) 
+
+	COMMIT
+GO
+IF OBJECT_ID('[dbo].[usp_TicketSelectList]') IS NOT NULL
+BEGIN 
+    DROP PROC [dbo].[usp_TicketSelectList] 
+END 
+GO
+CREATE PROC [dbo].[usp_TicketSelectList] 
+AS 
+	SET NOCOUNT ON 
+	SET XACT_ABORT ON  
+
+	BEGIN TRAN
+
+	SELECT [TicketId] as Id, [Name], [Price], [EventId], [TotalCount], [IsRemoved]
+	FROM   [dbo].[Ticket] 
 
 	COMMIT
 GO
@@ -29,20 +46,21 @@ CREATE PROC [dbo].[usp_TicketInsert]
     @Name nvarchar(64),
     @Price money = NULL,
     @EventId int,
-    @TotalCount int
+    @TotalCount int,
+	@IsRemoved bit = 0
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
 	
 	BEGIN TRAN
 	
-	INSERT INTO [dbo].[Ticket] ([Name], [Price], [EventId], [TotalCount])
-	SELECT @Name, @Price, @EventId, @TotalCount
+	INSERT INTO [dbo].[Ticket] ([Name], [Price], [EventId], [TotalCount], [IsRemoved])
+	SELECT @Name, @Price, @EventId, @TotalCount, @IsRemoved
 	
 	
-	SELECT [EventPriceId], [Name], [Price], [EventId], [TotalCount]
+	SELECT [TicketId] as Id, [Name], [Price], [EventId], [TotalCount], [IsRemoved]
 	FROM   [dbo].[Ticket]
-	WHERE  [EventPriceId] = SCOPE_IDENTITY()
+	WHERE  [TicketId] = SCOPE_IDENTITY()
 
                
 	COMMIT
@@ -53,11 +71,12 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_TicketUpdate] 
-    @EventPriceId int,
+    @Id int,
     @Name nvarchar(64),
     @Price money = NULL,
     @EventId int,
-    @TotalCount int
+    @TotalCount int,
+	@IsRemoved bit = 0
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -65,13 +84,13 @@ AS
 	BEGIN TRAN
 
 	UPDATE [dbo].[Ticket]
-	SET    [Name] = @Name, [Price] = @Price, [EventId] = @EventId, [TotalCount] = @TotalCount
-	WHERE  [EventPriceId] = @EventPriceId
+	SET    [Name] = @Name, [Price] = @Price, [EventId] = @EventId, [TotalCount] = @TotalCount, [IsRemoved] = @IsRemoved
+	WHERE  [TicketId] = @Id
 	
 	
-	SELECT [EventPriceId], [Name], [Price], [EventId], [TotalCount]
+	SELECT [TicketId] as Id, [Name], [Price], [EventId], [TotalCount], [IsRemoved]
 	FROM   [dbo].[Ticket]
-	WHERE  [EventPriceId] = @EventPriceId	
+	WHERE  [TicketId] = @Id	
 
 
 	COMMIT
@@ -82,7 +101,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_TicketDelete] 
-    @EventPriceId int
+    @Id int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -91,7 +110,7 @@ AS
 
 	DELETE
 	FROM   [dbo].[Ticket]
-	WHERE  [EventPriceId] = @EventPriceId
+	WHERE  [TicketId] = @Id
 
 	COMMIT
 GO

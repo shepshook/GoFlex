@@ -22,56 +22,63 @@ namespace GoFlex.Infrastructure.Repositories
 
         public async Task<IEnumerable<Event>> GetAllAsync(IDictionary<string, object> parameters)
         {
-            var items = await _database.ReadEntitiesAsync<Event>("", parameters);
+            var items = await _database.ReadEntitiesAsync<Event>("usp_EventSelectList", parameters);
             return await MakeInclusionsAsync(items.ToList());
         }
 
-        public async Task UpdateAsync(Event entity)
+        public async Task<Event> UpdateAsync(Event entity)
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            foreach (var price in entity.Prices)
-                await _unitOfWork.EventPriceRepository.InsertAsync(price);
+            foreach (var price in entity.Tickets)
+                await _unitOfWork.TicketRepository.InsertAsync(price);
 
-            await _database.UpdateEntityAsync("usp_EventUpdate", entity);
+            return await _database.UpdateEntityAsync("usp_EventUpdate", entity);
         }
 
-        public async Task InsertAsync(Event entity)
+        public async Task<Event> InsertAsync(Event entity)
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            if (await GetAsync(entity.Id) != null)
+            if (entity.Id != default && await GetAsync(entity.Id) != null)
             {
-                await UpdateAsync(entity);
-                return;
+                return await UpdateAsync(entity);
             }
 
-            foreach (var price in entity.Prices)
-                await _unitOfWork.EventPriceRepository.InsertAsync(price);
+            var insertedEntity = await _database.CreateEntityAsync("usp_EventInsert", entity);
 
-            await _database.CreateEntityAsync("usp_EventInsert", entity);
+            if (entity.Tickets != null)
+            {
+                foreach (var ticket in entity.Tickets)
+                {
+                    ticket.EventId = insertedEntity.Id;
+                    await _unitOfWork.TicketRepository.InsertAsync(ticket);
+                }
+            }
+
+            return insertedEntity;
         }
 
-        public async Task RemoveAsync(int key) 
+        public async Task RemoveAsync(int key)
         {
             await _database.RemoveEntityAsync("usp_EventDelete", key);
         }
 
         private async Task<IEnumerable<Event>> MakeInclusionsAsync(IList<Event> events)
         {
-            var prices = await _unitOfWork.EventPriceRepository.GetAllAsync();
-            var categories = await _unitOfWork.EventCategoryRepository.GetAllAsync();
-            var users = await _unitOfWork.UserRepository.GetAllAsync();
-            var locations = await _unitOfWork.LocationRepository.GetAllAsync();
+            var prices = (await _unitOfWork.TicketRepository.GetAllAsync()).ToList();
+            var categories = (await _unitOfWork.CategoryRepository.GetAllAsync()).ToList();
+            var users = (await _unitOfWork.UserRepository.GetAllAsync()).ToList();
+            var locations = (await _unitOfWork.LocationRepository.GetAllAsync()).ToList();
 
-            foreach (var item in events)
+            foreach (var item in events.Where(x => x != null))
             {
-                item.Prices = prices.Where(x => x.EventId == item.Id).ToList();
-                item.Category = categories.Single(x => x.Id == item.EventCategoryId);
-                item.Organizer = users.Single(x => x.Id == item.OrganizerId);
-                item.Location = locations.SingleOrDefault(x => x.Id == item.LocationId);
+                item.Tickets = prices.Where(x => x?.EventId == item.Id).ToList();
+                item.Category = categories.Single(x => x?.Id == item.CategoryId);
+                item.Organizer = users.Single(x => x?.Id == item.OrganizerId);
+                item.Location = locations.SingleOrDefault(x => x?.Id == item.LocationId);
             }
 
             return events;

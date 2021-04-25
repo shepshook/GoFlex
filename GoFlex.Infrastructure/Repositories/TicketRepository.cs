@@ -25,20 +25,22 @@ namespace GoFlex.Infrastructure.Repositories
 
         public Task<IEnumerable<Ticket>> GetAllAsync(IDictionary<string, object> parameters)
         {
-            return _database.ReadEntitiesAsync<Ticket>("", parameters);
+            return _database.ReadEntitiesAsync<Ticket>("usp_TicketSelectList", parameters);
         }
 
-        public async Task UpdateAsync(Ticket entity)
+        public Task<Ticket> UpdateAsync(Ticket entity)
         {
-            await _database.UpdateEntityAsync("usp_TicketUpdate", entity);
+            return _database.UpdateEntityAsync("usp_TicketUpdate", entity);
         }
 
-        public async Task InsertAsync(Ticket entity)
+        public async Task<Ticket> InsertAsync(Ticket entity)
         {
-            if (await GetAsync(entity.Id) != null)
-                await UpdateAsync(entity);
+            if (entity.Id != default && await GetAsync(entity.Id) != null)
+            {
+                return await UpdateAsync(entity);
+            }
 
-            await _database.CreateEntityAsync("usp_TicketInsert", entity);
+            return await _database.CreateEntityAsync("usp_TicketInsert", entity);
         }
 
         public async Task RemoveAsync(int key)

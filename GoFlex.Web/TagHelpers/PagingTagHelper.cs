@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using GoFlex.Web.ViewModels;
+using GoFlex.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace GoFlex.Web.TagHelpers
+namespace GoFlex.TagHelpers
 {
     public class PagingTagHelper : TagHelper
     {

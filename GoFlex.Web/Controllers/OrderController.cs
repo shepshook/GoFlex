@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories.Abstractions;
-using GoFlex.Web.ViewModels;
+using GoFlex.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-namespace GoFlex.Web.Controllers
+namespace GoFlex.Controllers
 {
     public class OrderController : Controller
     {
@@ -24,7 +25,7 @@ namespace GoFlex.Web.Controllers
         //todo: probably make a rest api version of this action with popup and move it to PaymentController
         [Authorize]
         [HttpPost("[controller]/[action]")]
-        public IActionResult Confirm(int[] id, int?[] count)
+        public async Task<IActionResult> Confirm(int[] id, int?[] count)
         {
             //todo: move business logic to a service
             var order = new Order
@@ -38,15 +39,13 @@ namespace GoFlex.Web.Controllers
             if (!order.Items.Any())
                 return BadRequest();
 
-            order.Event = _unitOfWork.EventPriceRepository.Get(order.Items.First().TicketId).Event;
-
+            order.EventId = (await _unitOfWork.TicketRepository.GetAsync(id.First())).EventId;
             order.UserId = Guid.Parse(User.FindFirst("userId").Value);
 
-            _unitOfWork.OrderRepository.Insert(order);
-            _unitOfWork.Commit();
+            order = await _unitOfWork.OrderRepository.InsertAsync(order);
 
             // Reload the order to populate nav props
-            order = _unitOfWork.OrderRepository.Get(order.Id);
+            order = await _unitOfWork.OrderRepository.GetAsync(order.Id);
 
             var model = new OrderViewModel
             {

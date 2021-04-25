@@ -1,4 +1,4 @@
-﻿@model GoFlex.Web.ViewModels.OrderViewModel
+﻿@model GoFlex.ViewModels.OrderViewModel
 
 @{
     Layout = "_MainLayout";
@@ -17,12 +17,12 @@
     @foreach (var item in Model.Order.Items)
     {
         <tr>
-            <td>@item.EventPrice.Name</td>
-            <td>@item.EventPrice.FormattedPrice</td>
+            <td>@item.Ticket.Name</td>
+            <td>@item.Ticket.FormattedPrice()</td>
             <td>@item.Quantity</td>
         </tr>
     }
-    <tr><td colspan="3">Total price: @Model.Order.TotalPriceFormatted</td></tr>
+    <tr><td colspan="3">Total price: @Model.Order.TotalPriceFormatted()</td></tr>
     </tbody>
 </table>
 <button class="btn btn-primary" id="checkout-button">Pay</button>

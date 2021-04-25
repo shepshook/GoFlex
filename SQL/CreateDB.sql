@@ -1,3 +1,12 @@
+if not exists (select * from sys.databases where [Name] = 'DataModelling')
+begin
+	create database [DataModelling]
+end
+go
+
+use DataModelling
+go
+
 if object_id('[dbo].[Location]') is not null
 	drop table [Location]
 go
@@ -85,8 +94,7 @@ create table [Event]
 	[DateTime] datetime not null,
 	[CreateTime] datetime not null 
 		default getdate(),
-	IsApproved bit not null
-		default 0,
+	IsApproved bit,
 	Photo varbinary(max)
 )
 go
@@ -108,6 +116,9 @@ create table [Comment]
 		constraint Comment_Event_EventId_fk
 			references [Event]
 			on delete cascade,
+	UserId uniqueidentifier
+		constraint Comment_User_UserId_fk
+			references [User],
 	[Text] nvarchar(256) not null,
 	constraint CHK_CommentHasParent 
 		check (ParentId is not null or EventId is not null)
@@ -120,13 +131,14 @@ go
 
 create table Ticket
 (
-	EventPriceId int identity
-		constraint EventPrice_pk
+	TicketId int identity
+		constraint Ticket_pk
 			primary key,
 	[Name] nvarchar(64) not null,
 	Price money,
+	IsRemoved bit not null default 0,
 	EventId int not null
-		constraint EventPrice_Event_EventId_fk
+		constraint Ticket_Event_EventId_fk
 			references Event
 				on update cascade on delete cascade,
 	TotalCount int not null

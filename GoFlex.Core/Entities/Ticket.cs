@@ -7,7 +7,7 @@ namespace GoFlex.Core.Entities
     {
         public string Name { get; set; }
         public decimal Price { get; set; }
-        public int Total { get; set; }
+        public int TotalCount { get; set; }
         public bool IsRemoved { get; set; }
 
         public int EventId { get; set; }
@@ -15,8 +15,8 @@ namespace GoFlex.Core.Entities
         
         public virtual ICollection<OrderItem> OrderedItems { get; set; }
 
-        public string FormattedPrice => $"{Price:N} BYN";
-        public int Sold => OrderedItems.Select(item => item.Quantity).Sum();
-        public int Remains => Total - Sold;
+        public string FormattedPrice() => $"{Price:N} BYN";
+        public int Sold() => OrderedItems?.Select(item => item.Quantity).Sum() ?? 0;
+        public int Remains() => TotalCount - Sold();
     }
 }

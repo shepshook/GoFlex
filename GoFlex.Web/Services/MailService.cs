@@ -4,16 +4,15 @@ using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories.Abstractions;
-using GoFlex.Web.Services.Abstractions;
+using GoFlex.Services.Abstractions;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
-using MimeKit.Utils;
 using QRCoder;
 using Serilog;
 
-namespace GoFlex.Web.Services
+namespace GoFlex.Services
 {
     public class MailService : IMailService
     {
@@ -46,6 +45,7 @@ namespace GoFlex.Web.Services
 
         public void SendOrder(Order order, string requestBase, IUrlHelper url)
         {
+            throw new NotImplementedException();
             var message = BuildMessage(order, requestBase, url);
             try
             {
@@ -65,6 +65,7 @@ namespace GoFlex.Web.Services
 
         private MimeMessage BuildMessage(Order order, string requestBase, IUrlHelper url)
         {
+            throw new NotImplementedException();
             var message = new MimeMessage
             {
                 Subject = "Your order from GoFlex"
@@ -76,15 +77,15 @@ namespace GoFlex.Web.Services
             var builder = new BodyBuilder();
             foreach (var item in order.Items)
             {
-                foreach (var secret in item.Secrets)
-                {
-                    var image = builder.LinkedResources.Add($"{item.Ticket.Name}",
-                        GetQrCodeBytes(requestBase + url.Action("ConfirmTicket", "Organizer", new {id = secret.Id})));
+                //foreach (var secret in item.Secrets)
+                //{
+                //    var image = builder.LinkedResources.Add($"{item.Ticket.Name}",
+                //        GetQrCodeBytes(requestBase + url.Action("ConfirmTicket", "Organizer", new {id = secret.Id})));
 
-                    image.ContentId = MimeUtils.GenerateMessageId();
+                //    image.ContentId = MimeUtils.GenerateMessageId();
 
-                    builder.HtmlBody += GetTicketHtml(item.Ticket, image.ContentId);
-                }
+                //    builder.HtmlBody += GetTicketHtml(item.Ticket, image.ContentId);
+                //}
             }
 
             message.Body = builder.ToMessageBody();
@@ -110,7 +111,7 @@ namespace GoFlex.Web.Services
                    $"       <td rowspan=\"3\"><img src=\"cid:{imageId}\"/></td>" +
                    $"   </tr>" +
                    $"   <tr><td><h4>At: {item.Event.Location.Name}</h5></td></tr>" +
-                   $"   <tr><td><h4>On: {item.Event.ShortDateTime}</h4></td></tr>" +
+                   $"   <tr><td><h4>On: {item.Event.ShortDateTime()}</h4></td></tr>" +
                    $"</table>" +
                    $"<hr/>";
         }

@@ -1,4 +1,4 @@
-﻿@model GoFlex.Web.ViewModels.SignUpViewModel
+﻿@model GoFlex.ViewModels.SignUpViewModel
 
 @{
     Layout = "_BaseLayout";
@@ -21,13 +21,10 @@
                            required minlength="5" maxlength="128" />
                     <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
-                <div class="form-group mb-2">
-                    <input asp-for="IsOrganizer" id="checkbox" type="checkbox" class="form-check-inline"/>
-                    <label for="checkbox">I'm an organizer</label>
-                </div>
                 <input type="submit" value="Sign Up" class="btn btn-primary"/>
                 <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl"/>
             </form>
+            <a asp-action="SignUpOrganizer" asp-route-returnUrl="@ViewBag.ReturnUrl">I'm an organizer</a>
         </div>
     </div>
 </div>

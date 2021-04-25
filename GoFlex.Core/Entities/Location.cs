@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace GoFlex.Core.Entities
+﻿namespace GoFlex.Core.Entities
 {
     public class Location : Entity<int>
     {
@@ -8,8 +6,5 @@ namespace GoFlex.Core.Entities
         public string Photo { get; set; }
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
-        public int CityId { get; set; }
-
-        public virtual City City { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Serilog;
 
-namespace GoFlex.Web
+namespace GoFlex
 {
     public static class SerilogHelper
     {

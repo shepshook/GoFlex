@@ -1,16 +1,19 @@
 ﻿using System;
+using System.Threading.Tasks;
 using GoFlex.Core.Entities;
 
-namespace GoFlex.Web.Services.Abstractions
+namespace GoFlex.Services.Abstractions
 {
     public interface IAuthService
     {
-        User GetUser(string search);
+        Task<User> GetUser(string search);
 
-        bool CreateUser(string email, string password, string roleName);
+        Task<bool> CreateCustomer(string email, string password);
+
+        Task<bool> CreateOrganizer(Organizer organizer, string email, string password);
 
         bool VerifyPassword(User user, string password);
 
-        bool UpdatePassword(Guid userId, string oldPassword, string newPassword);
+        Task<bool> UpdatePassword(Guid userId, string oldPassword, string newPassword);
     }
 }

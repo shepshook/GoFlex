@@ -7,8 +7,8 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_Order_TicketSelect] 
-    @OrderId int,
-    @TicketId int
+    @Id1 int,
+    @Id2 int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -17,8 +17,25 @@ AS
 
 	SELECT [OrderId], [TicketId], [Quantity] 
 	FROM   [dbo].[Order_Ticket] 
-	WHERE  ([OrderId] = @OrderId OR @OrderId IS NULL) 
-	       AND ([TicketId] = @TicketId OR @TicketId IS NULL) 
+	WHERE  ([OrderId] = @Id1 OR @Id1 IS NULL) 
+	       AND ([TicketId] = @Id2 OR @Id2 IS NULL) 
+
+	COMMIT
+GO
+IF OBJECT_ID('[dbo].[usp_Order_TicketSelectList]') IS NOT NULL
+BEGIN 
+    DROP PROC [dbo].[usp_Order_TicketSelectList] 
+END 
+GO
+CREATE PROC [dbo].[usp_Order_TicketSelectList] 
+AS 
+	SET NOCOUNT ON 
+	SET XACT_ABORT ON  
+
+	BEGIN TRAN
+
+	SELECT [OrderId], [TicketId], [Quantity] 
+	FROM   [dbo].[Order_Ticket] 
 
 	COMMIT
 GO
@@ -69,7 +86,7 @@ AS
 	       AND [TicketId] = @TicketId
 	
 	
-	SELECT [OrderId], [TicketId], [Quantity]
+	SELECT [OrderId] as Id, [TicketId], [Quantity]
 	FROM   [dbo].[Order_Ticket]
 	WHERE  [OrderId] = @OrderId
 	       AND [TicketId] = @TicketId	
@@ -83,8 +100,8 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_Order_TicketDelete] 
-    @OrderId int,
-    @TicketId int
+    @Id1 int,
+    @Id2 int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -93,8 +110,8 @@ AS
 
 	DELETE
 	FROM   [dbo].[Order_Ticket]
-	WHERE  [OrderId] = @OrderId
-	       AND [TicketId] = @TicketId
+	WHERE  [OrderId] = @Id1
+	       AND [TicketId] = @Id2
 
 	COMMIT
 GO

@@ -1,6 +1,6 @@
 ﻿using GoFlex.Core.Entities;
 
-namespace GoFlex.Web.ViewModels
+namespace GoFlex.ViewModels
 {
     public class OrderViewModel
     {

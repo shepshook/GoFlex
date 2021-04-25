@@ -7,16 +7,33 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_EventSelect] 
-    @EventId int
+    @Id int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
 
 	BEGIN TRAN
 
-	SELECT [EventId], [CategoryId], [LocationId], [OrganizerId], [Name], [Description], [DateTime], [CreateTime], [IsApproved], [Photo] 
+	SELECT [EventId] as Id, [CategoryId], [LocationId], [OrganizerId], [Name], [Description], [DateTime], [CreateTime], [IsApproved], [Photo] 
 	FROM   [dbo].[Event] 
-	WHERE  ([EventId] = @EventId OR @EventId IS NULL) 
+	WHERE  ([EventId] = @Id OR @Id IS NULL) 
+
+	COMMIT
+GO
+IF OBJECT_ID('[dbo].[usp_EventSelectList]') IS NOT NULL
+BEGIN 
+    DROP PROC [dbo].[usp_EventSelectList] 
+END 
+GO
+CREATE PROC [dbo].[usp_EventSelectList] 
+AS 
+	SET NOCOUNT ON 
+	SET XACT_ABORT ON  
+
+	BEGIN TRAN
+
+	SELECT [EventId] as Id, [CategoryId], [LocationId], [OrganizerId], [Name], [Description], [DateTime], [CreateTime], [IsApproved], [Photo] 
+	FROM   [dbo].[Event] 
 
 	COMMIT
 GO
@@ -33,8 +50,8 @@ CREATE PROC [dbo].[usp_EventInsert]
     @Description nvarchar(1024) = NULL,
     @DateTime datetime,
     @CreateTime datetime,
-    @IsApproved bit,
-    @Photo varbinary(MAX) = NULL
+    @IsApproved bit = NULL,
+    @Photo nvarchar(MAX) = NULL
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -45,7 +62,7 @@ AS
 	SELECT @CategoryId, @LocationId, @OrganizerId, @Name, @Description, @DateTime, @CreateTime, @IsApproved, @Photo
 	
 
-	SELECT [EventId], [CategoryId], [LocationId], [OrganizerId], [Name], [Description], [DateTime], [CreateTime], [IsApproved], [Photo]
+	SELECT [EventId] as Id, [CategoryId], [LocationId], [OrganizerId], [Name], [Description], [DateTime], [CreateTime], [IsApproved], [Photo]
 	FROM   [dbo].[Event]
 	WHERE  [EventId] = SCOPE_IDENTITY()
                
@@ -57,7 +74,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_EventUpdate] 
-    @EventId int,
+    @Id int,
     @CategoryId int,
     @LocationId int = NULL,
     @OrganizerId uniqueidentifier,
@@ -65,8 +82,8 @@ CREATE PROC [dbo].[usp_EventUpdate]
     @Description nvarchar(1024) = NULL,
     @DateTime datetime,
     @CreateTime datetime,
-    @IsApproved bit,
-    @Photo varbinary(MAX) = NULL
+    @IsApproved bit = NULL,
+    @Photo nvarchar(MAX) = NULL
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -75,12 +92,12 @@ AS
 
 	UPDATE [dbo].[Event]
 	SET    [CategoryId] = @CategoryId, [LocationId] = @LocationId, [OrganizerId] = @OrganizerId, [Name] = @Name, [Description] = @Description, [DateTime] = @DateTime, [CreateTime] = @CreateTime, [IsApproved] = @IsApproved, [Photo] = @Photo
-	WHERE  [EventId] = @EventId
+	WHERE  [EventId] = @Id
 	
 
-	SELECT [EventId], [CategoryId], [LocationId], [OrganizerId], [Name], [Description], [DateTime], [CreateTime], [IsApproved], [Photo]
+	SELECT [EventId] as Id, [CategoryId], [LocationId], [OrganizerId], [Name], [Description], [DateTime], [CreateTime], [IsApproved], [Photo]
 	FROM   [dbo].[Event]
-	WHERE  [EventId] = @EventId	
+	WHERE  [EventId] = @Id	
 
 	COMMIT
 GO
@@ -90,7 +107,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_EventDelete] 
-    @EventId int
+    @Id int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -99,7 +116,7 @@ AS
 
 	DELETE
 	FROM   [dbo].[Event]
-	WHERE  [EventId] = @EventId
+	WHERE  [EventId] = @Id
 
 	COMMIT
 GO

@@ -7,8 +7,13 @@ namespace GoFlex.Core.Entities
         public string Email { get; set; }
         public string PasswordHash { get; set; }
         public string PasswordSalt { get; set; }
-        public int RoleId { get; set; }
+        public Role Role { get; set; }
+    }
 
-        public virtual Role Role { get; set; }
+    public enum Role
+    {
+        Admin,
+        Customer,
+        Organizer
     }
 }

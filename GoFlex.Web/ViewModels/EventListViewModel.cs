@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using GoFlex.Core.Entities;
 
-namespace GoFlex.Web.ViewModels
+namespace GoFlex.ViewModels
 {
     public class EventListViewModel
     {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories;
@@ -17,22 +18,33 @@ namespace GoFlex.Infrastructure.Repositories
             return _database.ReadEntityAsync<User>("usp_UserSelect", key);
         }
 
+        public async Task<User> GetByEmailAsync(string email)
+        {
+            return (await GetAllAsync()).SingleOrDefault(x => string.Equals(x.Email, email, StringComparison.InvariantCultureIgnoreCase));
+        }
+
         public Task<IEnumerable<User>> GetAllAsync(IDictionary<string, object> parameters = null)
         {
-            return _database.ReadEntitiesAsync<User>("", parameters);
+            return _database.ReadEntitiesAsync<User>("usp_UserSelectList", parameters);
         }
 
-        public async Task UpdateAsync(User entity)
+        public Task<User> UpdateAsync(User entity)
         {
-            await _database.UpdateEntityAsync("usp_UserUpdate", entity);
+            return _database.UpdateEntityAsync("usp_UserUpdate", entity);
         }
 
-        public async Task InsertAsync(User entity)
+        public async Task<User> InsertAsync(User entity)
         {
-            if (await GetAsync(entity.Id) != null)
-                await UpdateAsync(entity);
+            if (entity.Id == default)
+            {
+                entity.Id = Guid.NewGuid();
+            }
+            else if (await GetAsync(entity.Id) != null)
+            {
+                return await UpdateAsync(entity);
+            }
 
-            await _database.CreateEntityAsync("usp_UserInsert", entity);
+            return await _database.CreateEntityAsync("usp_UserInsert", entity);
         }
 
         public async Task RemoveAsync(Guid key)

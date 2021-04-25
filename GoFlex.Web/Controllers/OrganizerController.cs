@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
+using GoFlex.Services.Abstractions;
 using GoFlex.ViewModels;
-using GoFlex.Web.Services.Abstractions;
-using GoFlex.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
-namespace GoFlex.Web.Controllers
+namespace GoFlex.Controllers
 {
     [Authorize(Roles = "Admin,Organizer")]
     public class OrganizerController : Controller
@@ -21,7 +21,7 @@ namespace GoFlex.Web.Controllers
         }
 
         [Route("[controller]/[action]")]
-        public IActionResult Events(int? category, bool? onlyActive, bool? onlyApproved, string order, int page = 1)
+        public async Task<IActionResult> Events(int? category, bool? onlyActive, bool? onlyApproved, string order, int page = 1)
         {
             Enum.TryParse(typeof(EventListOrder), order, true, out var orderValue);
 
@@ -34,45 +34,44 @@ namespace GoFlex.Web.Controllers
                 Ordering = (EventListOrder?) orderValue
             };
 
-            var model = _eventService.GetPage(page, filter);
+            var model = await _eventService.GetPage(page, filter);
 
-            if (page < 1 || page > model.Page.Total)
+            if (page < 1 || page > model.Page.Total && model.Page.Total != 0)
                 return NotFound();
 
             return View(model);
         }
 
         [Route("[controller]/[action]")]
-        public IActionResult Statistics()
+        public async Task<IActionResult> Statistics()
         {
             var filter = new EventListFilter
             {
                 OrganizerId = Guid.Parse(User.FindFirst("userId").Value)
             };
 
-            var events = _eventService.GetList(filter);
+            var events = await _eventService.GetList(filter);
 
             return View(events);
         }
 
         [HttpGet("[controller]/[action]")]
-        public IActionResult AddEvent(string returnUrl)
+        public async Task<IActionResult> AddEvent(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
 
-            var model = _eventService.ActualizeModel();
+            var model = await _eventService.ActualizeModel();
             model.Date = DateTime.Now.Date;
-
 
             return View(model);
         }
 
         [HttpGet("[controller]/[action]/{id:int}")]
-        public IActionResult EditEvent(int id, string returnUrl)
+        public async Task<IActionResult> EditEvent(int id, string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
 
-            var model = _eventService.GetSingle(id);
+            var model = await _eventService.GetSingle(id);
 
             if (model == null || model.OrganizerId != Guid.Parse(User.FindFirst("userId").Value))
                 return NotFound();
@@ -81,7 +80,7 @@ namespace GoFlex.Web.Controllers
         }
 
         [HttpPost("[controller]/[action]")]
-        public IActionResult SaveEvent(EventEditViewModel model, string returnUrl = null)
+        public async Task<IActionResult> SaveEvent(EventEditViewModel model, string returnUrl = null)
         {
             ViewBag.ReturnUrl = returnUrl;
 
@@ -93,7 +92,7 @@ namespace GoFlex.Web.Controllers
 
             if (!ModelState.IsValid)
             {
-                model = _eventService.ActualizeModel(model);
+                model = await _eventService.ActualizeModel(model);
                 return View(model.Id.HasValue ? "EditEvent" : "AddEvent", model);
             }
 
@@ -102,13 +101,13 @@ namespace GoFlex.Web.Controllers
             var ok = true;
             if (model.Id.HasValue)
             {
-                ok = _eventService.UpdateEvent(model);
+                ok = await _eventService.UpdateEvent(model);
                 if (ok) 
                     _logger.Here().Information("Event updated: {@Event}", model);
             }
             else
             {
-                _eventService.AddEvent(model);
+                await _eventService.AddEvent(model);
                 _logger.Here().Information("New event created: {@Event}", model);
             }
 
@@ -122,11 +121,11 @@ namespace GoFlex.Web.Controllers
         }
 
         [HttpPost("[controller]/[action]")]
-        public IActionResult SavePrice(int id, EventPriceViewModel currentPrice, string returnUrl)
+        public async Task<IActionResult> SavePrice(int id, EventPriceViewModel currentPrice, string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
 
-            var model = _eventService.GetSingle(id);
+            var model = await _eventService.GetSingle(id);
             if (model == null)
                 return NotFound();
 
@@ -138,9 +137,9 @@ namespace GoFlex.Web.Controllers
 
             var ok = true;
             if (currentPrice.Id.HasValue)
-                ok = _eventService.UpdatePrice(id, currentPrice);
+                ok = await _eventService.UpdatePrice(id, currentPrice);
             else
-                _eventService.AddPrice(id, currentPrice);
+                await _eventService.AddPrice(id, currentPrice);
 
             if (!ok)
                 return NotFound();
@@ -148,25 +147,25 @@ namespace GoFlex.Web.Controllers
             if (!string.IsNullOrEmpty(returnUrl))
                 return Redirect(returnUrl);
 
-            return View("EditEvent", _eventService.GetSingle(id));
+            return View("EditEvent", await _eventService.GetSingle(id));
         }
 
         [HttpPost("[controller]/[action]")]
-        public IActionResult RemovePrice(int id, int priceId, string returnUrl)
+        public async Task<IActionResult> RemovePrice(int id, int priceId, string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
 
-            var model = _eventService.GetSingle(id);
+            var model = await _eventService.GetSingle(id);
             if (model == null)
                 return NotFound();
 
-            if (!_eventService.RemovePrice(priceId))
+            if (!await _eventService.RemovePrice(priceId))
                 return NotFound();
 
             if (!string.IsNullOrEmpty(returnUrl))
                 return Redirect(returnUrl);
 
-            model = _eventService.GetSingle(id);
+            model = await _eventService.GetSingle(id);
             return View("EditEvent", model);
         }
 

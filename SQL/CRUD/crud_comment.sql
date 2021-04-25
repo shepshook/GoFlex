@@ -7,16 +7,33 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_CommentSelect] 
-    @CommentId uniqueidentifier
+    @Id uniqueidentifier
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
 
 	BEGIN TRAN
 
-	SELECT [CommentId], [ParentId], [EventId], [Text] 
+	SELECT [CommentId] as Id, [ParentId], [EventId], [UserId], [Text] 
 	FROM   [dbo].[Comment] 
-	WHERE  ([CommentId] = @CommentId OR @CommentId IS NULL) 
+	WHERE  ([CommentId] = @Id OR @Id IS NULL) 
+
+	COMMIT
+GO
+IF OBJECT_ID('[dbo].[usp_CommentSelectList]') IS NOT NULL
+BEGIN 
+    DROP PROC [dbo].[usp_CommentSelectList] 
+END 
+GO
+CREATE PROC [dbo].[usp_CommentSelectList] 
+AS 
+	SET NOCOUNT ON 
+	SET XACT_ABORT ON  
+
+	BEGIN TRAN
+
+	SELECT [CommentId] as Id, [ParentId], [EventId], [UserId], [Text] 
+	FROM   [dbo].[Comment]
 
 	COMMIT
 GO
@@ -26,9 +43,10 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_CommentInsert] 
-    @CommentId uniqueidentifier,
+    @Id uniqueidentifier,
     @ParentId uniqueidentifier = NULL,
     @EventId int = NULL,
+	@UserId uniqueidentifier,
     @Text nvarchar(256)
 AS 
 	SET NOCOUNT ON 
@@ -36,13 +54,13 @@ AS
 	
 	BEGIN TRAN
 	
-	INSERT INTO [dbo].[Comment] ([CommentId], [ParentId], [EventId], [Text])
-	SELECT @CommentId, @ParentId, @EventId, @Text
+	INSERT INTO [dbo].[Comment] ([CommentId], [ParentId], [EventId], [UserId], [Text])
+	SELECT @Id, @ParentId, @EventId, @UserId, @Text
 	
 
-	SELECT [CommentId], [ParentId], [EventId], [Text]
+	SELECT [CommentId] as Id, [ParentId], [EventId], [UserId], [Text]
 	FROM   [dbo].[Comment]
-	WHERE  [CommentId] = @CommentId
+	WHERE  [CommentId] = @Id
 
                
 	COMMIT
@@ -53,9 +71,10 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_CommentUpdate] 
-    @CommentId uniqueidentifier,
+    @Id uniqueidentifier,
     @ParentId uniqueidentifier = NULL,
     @EventId int = NULL,
+	@UserId uniqueidentifier,
     @Text nvarchar(256)
 AS 
 	SET NOCOUNT ON 
@@ -64,13 +83,13 @@ AS
 	BEGIN TRAN
 
 	UPDATE [dbo].[Comment]
-	SET    [ParentId] = @ParentId, [EventId] = @EventId, [Text] = @Text
-	WHERE  [CommentId] = @CommentId
+	SET    [ParentId] = @ParentId, [EventId] = @EventId, [UserId] = @UserId, [Text] = @Text
+	WHERE  [CommentId] = @Id
 	
 
-	SELECT [CommentId], [ParentId], [EventId], [Text]
+	SELECT [CommentId] as Id, [ParentId], [EventId], [UserId], [Text]
 	FROM   [dbo].[Comment]
-	WHERE  [CommentId] = @CommentId	
+	WHERE  [CommentId] = @Id	
 
 
 	COMMIT
@@ -81,7 +100,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_CommentDelete] 
-    @CommentId uniqueidentifier
+    @Id uniqueidentifier
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -90,7 +109,7 @@ AS
 
 	DELETE
 	FROM   [dbo].[Comment]
-	WHERE  [CommentId] = @CommentId
+	WHERE  [CommentId] = @Id
 
 	COMMIT
 GO

@@ -1,7 +1,8 @@
-﻿using GoFlex.Core.Repositories.Abstractions;
+﻿using System.Threading.Tasks;
+using GoFlex.Core.Repositories.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GoFlex.Web.Controllers
+namespace GoFlex.Controllers
 {
     public class LocationController : Controller
     {
@@ -13,12 +14,10 @@ namespace GoFlex.Web.Controllers
         }
 
         [Route("[controller]/[action]")]
-        public IActionResult List()
+        public async Task<IActionResult> List()
         {
-            var list = _unitOfWork.LocationRepository.All();
+            var list = await _unitOfWork.LocationRepository.GetAllAsync();
             return View(list);
         }
-
-        //todo: make a Location Details popup
     }
 }

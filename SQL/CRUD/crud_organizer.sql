@@ -7,16 +7,33 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_OrganizerSelect] 
-    @UserId uniqueidentifier
+    @Id uniqueidentifier
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
 
 	BEGIN TRAN
 
-	SELECT [UserId], [CompanyName], [BankAccountNumber] 
+	SELECT [UserId] as Id, [CompanyName], [BankAccountNumber] 
 	FROM   [dbo].[Organizer] 
-	WHERE  ([UserId] = @UserId OR @UserId IS NULL) 
+	WHERE  ([UserId] = @Id OR @Id IS NULL) 
+
+	COMMIT
+GO
+IF OBJECT_ID('[dbo].[usp_OrganizerSelectList]') IS NOT NULL
+BEGIN 
+    DROP PROC [dbo].[usp_OrganizerSelectList] 
+END 
+GO
+CREATE PROC [dbo].[usp_OrganizerSelectList] 
+AS 
+	SET NOCOUNT ON 
+	SET XACT_ABORT ON  
+
+	BEGIN TRAN
+
+	SELECT [UserId] as Id, [CompanyName], [BankAccountNumber] 
+	FROM   [dbo].[Organizer]
 
 	COMMIT
 GO
@@ -26,9 +43,9 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_OrganizerInsert] 
-    @UserId uniqueidentifier,
+	@Id uniqueidentifier,
     @CompanyName nvarchar(128),
-    @BankAccountNumber varchar(20)
+    @BankAccountNumber varchar(20) 
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -36,12 +53,12 @@ AS
 	BEGIN TRAN
 	
 	INSERT INTO [dbo].[Organizer] ([UserId], [CompanyName], [BankAccountNumber])
-	SELECT @UserId, @CompanyName, @BankAccountNumber
+	SELECT @Id, @CompanyName, @BankAccountNumber
 	
 	
-	SELECT [UserId], [CompanyName], [BankAccountNumber]
+	SELECT [UserId] as Id, [CompanyName], [BankAccountNumber]
 	FROM   [dbo].[Organizer]
-	WHERE  [UserId] = @UserId
+	WHERE  [UserId] = @Id
 	
                
 	COMMIT
@@ -52,7 +69,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_OrganizerUpdate] 
-    @UserId uniqueidentifier,
+    @Id uniqueidentifier,
     @CompanyName nvarchar(128),
     @BankAccountNumber varchar(20)
 AS 
@@ -63,11 +80,11 @@ AS
 
 	UPDATE [dbo].[Organizer]
 	SET    [CompanyName] = @CompanyName, [BankAccountNumber] = @BankAccountNumber
-	WHERE  [UserId] = @UserId
+	WHERE  [UserId] = @Id
 
-	SELECT [UserId], [CompanyName], [BankAccountNumber]
+	SELECT [UserId] as Id, [CompanyName], [BankAccountNumber]
 	FROM   [dbo].[Organizer]
-	WHERE  [UserId] = @UserId	
+	WHERE  [UserId] = @Id	
 
 
 	COMMIT
@@ -78,7 +95,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_OrganizerDelete] 
-    @UserId uniqueidentifier
+    @Id uniqueidentifier
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -87,7 +104,7 @@ AS
 
 	DELETE
 	FROM   [dbo].[Organizer]
-	WHERE  [UserId] = @UserId
+	WHERE  [UserId] = @Id
 
 	COMMIT
 GO

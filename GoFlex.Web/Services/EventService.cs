@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories.Abstractions;
+using GoFlex.Services.Abstractions;
 using GoFlex.ViewModels;
-using GoFlex.Web.Services.Abstractions;
-using GoFlex.Web.ViewModels;
 
-namespace GoFlex.Web.Services
+namespace GoFlex.Services
 {
     public class EventService : IEventService
     {
@@ -19,15 +19,21 @@ namespace GoFlex.Web.Services
             _unitOfWork = unitOfWork;
         }
 
-        public IEnumerable<Event> GetList(EventListFilter filter)
+        public async Task<IEnumerable<Event>> GetList(EventListFilter filter)
         {
-            return _unitOfWork.EventRepository.All(filter.BuildFilters().ToArray());
+            var events = await _unitOfWork.EventRepository.GetAllAsync();
+
+            return filter.ApplyTo(events);
         }
 
-        public EventListViewModel GetPage(int page, EventListFilter filter)
+        public async Task<EventListViewModel> GetPage(int page, EventListFilter filter)
         {
-            var events = _unitOfWork.EventRepository.GetPage(ItemsPerPage, page, out var totalPages,
-                filter.OrderKeySelector, filter.IsDescending, filter.BuildFilters().ToArray());
+            //var events = _unitOfWork.EventRepository.GetPage(ItemsPerPage, page, out var totalPages,
+            //    filter.OrderKeySelector, filter.IsDescending, filter.BuildFilters().ToArray());
+
+            var events = filter.ApplyTo(await _unitOfWork.EventRepository.GetAllAsync());
+            var pageEvents = events.Skip(ItemsPerPage * (page - 1)).Take(ItemsPerPage);
+            var totalPages = (int)Math.Ceiling(events.Count / (double)ItemsPerPage);
 
             var pageViewModel = new PageViewModel(page, totalPages)
             {
@@ -36,154 +42,155 @@ namespace GoFlex.Web.Services
 
             var model = new EventListViewModel
             {
-                Events = events,
+                Events = pageEvents,
                 Page = pageViewModel,
-                EventCategories = _unitOfWork.EventCategoryRepository.All()
+                EventCategories = await _unitOfWork.CategoryRepository.GetAllAsync()
             };
 
             return model;
         }
 
-        public EventEditViewModel GetSingle(int id)
+        public async Task<EventEditViewModel> GetSingle(int id)
         {
-            var item = _unitOfWork.EventRepository.Get(id);
-            return BuildModelFromEntity(item);
+            var item = await _unitOfWork.EventRepository.GetAsync(id);
+            return await BuildModelFromEntity(item);
         }
 
-        public Event GetSingleEntity(int id) => _unitOfWork.EventRepository.Get(id);
+        public Task<Event> GetSingleEntity(int id) => _unitOfWork.EventRepository.GetAsync(id);
 
-        public void AddEvent(EventEditViewModel model)
+        public async Task AddEvent(EventEditViewModel model)
         {
             var entity = BuildEntityFromModel(model);
 
-            _unitOfWork.EventRepository.Insert(entity);
-            _unitOfWork.Commit();
+            await _unitOfWork.EventRepository.InsertAsync(entity);
         }
 
-        public bool UpdateEvent(EventEditViewModel model)
+        public async Task<bool> UpdateEvent(EventEditViewModel model)
         {
-            var entity = _unitOfWork.EventRepository.Get(model.Id.Value);
+            var entity = await _unitOfWork.EventRepository.GetAsync(model.Id.Value);
             if (entity == null)
                 return false;
 
             entity = BuildEntityFromModel(model, entity);
-            _unitOfWork.Commit();
+            await _unitOfWork.EventRepository.UpdateAsync(entity);
 
             return true;
         }
 
-        public void AddPrice(int id, EventPriceViewModel model)
+        public async Task AddPrice(int id, EventPriceViewModel model)
         {
             var price = new Ticket
             {
                 Name = model.Name,
-                Total = model.Total,
+                TotalCount = model.Total,
                 Price = model.Price,
                 EventId = id
             };
 
-            _unitOfWork.EventPriceRepository.Insert(price);
-            _unitOfWork.Commit();
+            await _unitOfWork.TicketRepository.InsertAsync(price);
         }
 
-        public bool UpdatePrice(int id, EventPriceViewModel model)
+        public async Task<bool> UpdatePrice(int id, EventPriceViewModel model)
         {
-            var price = _unitOfWork.EventPriceRepository.Get(model.Id.Value);
+            var price = await _unitOfWork.TicketRepository.GetAsync(model.Id.Value);
             if (price == null)
                 return false;
 
             price.Name = model.Name;
 
-            if (model.Total < price.Sold)
+            if (model.Total < price.Sold())
                 return false;
-            price.Total = model.Total;
+            price.TotalCount = model.Total;
 
             if (model.Price != price.Price)
             {
                 var newPrice = new Ticket
                 {
                     Name = model.Name,
-                    Total = price.Total - price.Sold,
+                    TotalCount = price.TotalCount - price.Sold(),
                     Price = model.Price,
                     EventId = price.EventId
                 };
-                _unitOfWork.EventPriceRepository.Insert(newPrice);
+                await _unitOfWork.TicketRepository.InsertAsync(newPrice);
 
-                price.Total = price.Sold;
+                price.TotalCount = price.Sold();
                 price.IsRemoved = true;
             }
 
-            _unitOfWork.Commit();
+            await _unitOfWork.TicketRepository.UpdateAsync(price);
             return true;
         }
 
-        public EventEditViewModel ActualizeModel(EventEditViewModel model = null)
+        public async Task<EventEditViewModel> ActualizeModel(EventEditViewModel model = null)
         {
             model ??= new EventEditViewModel();
 
             if (model.Id.HasValue)
             {
-                model.Prices = _unitOfWork.EventRepository.Get(model.Id.Value).Prices.Select(price =>
+                model.Prices = (await _unitOfWork.EventRepository.GetAsync(model.Id.Value)).Tickets.Select(price =>
                     new EventPriceViewModel
                     {
                         Id = price.Id,
                         Name = price.Name,
                         Price = price.Price,
-                        Total = price.Total,
+                        Total = price.TotalCount,
                         IsRemoved = price.IsRemoved
                     });
             }
 
-            model.Categories = _unitOfWork.EventCategoryRepository.All();
-            model.Locations = _unitOfWork.LocationRepository.All();
+            model.Categories = await _unitOfWork.CategoryRepository.GetAllAsync();
+            model.Locations = await _unitOfWork.LocationRepository.GetAllAsync();
 
             return model;
         }
 
-        public bool RemovePrice(int priceId)
+        public async Task<bool> RemovePrice(int priceId)
         {
-            var entity = _unitOfWork.EventPriceRepository.Get(priceId);
+            var entity = await _unitOfWork.TicketRepository.GetAsync(priceId);
             if (entity == null) 
                 return false;
 
             entity.IsRemoved = true;
-            entity.Total = entity.Sold;
-            _unitOfWork.Commit();
+            entity.TotalCount = entity.Sold();
+
+            await _unitOfWork.TicketRepository.UpdateAsync(entity);
 
             return true;
         }
 
-        public bool AcceptEvent(int id, bool vote)
+        public async Task<bool> AcceptEvent(int id, bool vote)
         {
-            var entity = _unitOfWork.EventRepository.Get(id);
+            var entity = await _unitOfWork.EventRepository.GetAsync(id);
             if (entity == null)
                 return false;
 
             entity.IsApproved = vote;
-            _unitOfWork.Commit();
+
+            await _unitOfWork.EventRepository.UpdateAsync(entity);
 
             return true;
         }
 
         public TicketApproveViewModel ApproveTicket(Guid id)
         {
-            var secret = _unitOfWork.OrderItemSecretRepository.Get(id);
-            if (secret == null || secret.IsUsed)
-                return new TicketApproveViewModel {Approved = false};
+            //var secret = _unitOfWork.OrderItemSecretRepository.Get(id);
+            //if (secret == null || secret.IsUsed)
+            //    return new TicketApproveViewModel { Approved = false };
 
-            secret.IsUsed = true;
-            _unitOfWork.Commit();
+            //secret.IsUsed = true;
+            //_unitOfWork.Commit();
 
-            var eventPrice = _unitOfWork.EventPriceRepository.Get(secret.OrderItem.EventPriceId);
+            //var eventPrice = _unitOfWork.TicketRepository.Get(secret.OrderItem.EventPriceId);
 
-            return new TicketApproveViewModel
-            {
-                Approved = true,
-                EventPrice = eventPrice
-            };
+            //return new TicketApproveViewModel
+            //{
+            //    Approved = true,
+            //    EventPrice = eventPrice
+            //};
+            throw new NotImplementedException();
         }
 
-        private EventEditViewModel BuildModelFromEntity(Event e)
+        private async Task<EventEditViewModel> BuildModelFromEntity(Event e)
         {
             if (e == null)
                 return null;
@@ -193,22 +200,22 @@ namespace GoFlex.Web.Services
                 Id = e.Id,
                 Name = e.Name,
                 Description = e.Description,
-                CategoryId = e.EventCategoryId,
+                CategoryId = e.CategoryId,
                 LocationId = e.LocationId,
                 OrganizerId = e.OrganizerId,
                 Date = e.DateTime.Date,
                 Time = e.DateTime.TimeOfDay,
                 Photo = e.Photo,
-                Prices = e.Prices.Select(price => new EventPriceViewModel
+                Prices = e.Tickets.Select(price => new EventPriceViewModel
                 {
                     Id = price.Id,
                     Name = price.Name,
                     Price = price.Price,
-                    Total = price.Total,
+                    Total = price.TotalCount,
                     IsRemoved = price.IsRemoved
                 }),
-                Categories = _unitOfWork.EventCategoryRepository.All(),
-                Locations = _unitOfWork.LocationRepository.All()
+                Categories = await _unitOfWork.CategoryRepository.GetAllAsync(),
+                Locations = await _unitOfWork.LocationRepository.GetAllAsync()
             };
             return model;
         }
@@ -221,7 +228,7 @@ namespace GoFlex.Web.Services
             entity.Description = !string.IsNullOrWhiteSpace(model.Description) ? model.Description : null;
             entity.DateTime = model.Date + model.Time;
             entity.CreateTime = DateTime.Now;
-            entity.EventCategoryId = model.CategoryId;
+            entity.CategoryId = model.CategoryId;
             entity.LocationId = model.LocationId;
             entity.Photo = !string.IsNullOrWhiteSpace(model.Photo) ? model.Photo : null;
             entity.OrganizerId = model.OrganizerId;

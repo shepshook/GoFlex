@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity.Core;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories;
@@ -22,20 +18,22 @@ namespace GoFlex.Infrastructure.Repositories
 
         public Task<IEnumerable<Location>> GetAllAsync(IDictionary<string, object> parameters)
         {
-            return _database.ReadEntitiesAsync<Location>("", parameters);
+            return _database.ReadEntitiesAsync<Location>("usp_LocationSelectList", parameters);
         }
 
-        public async Task UpdateAsync(Location entity)
+        public Task<Location> UpdateAsync(Location entity)
         {
-            await _database.UpdateEntityAsync("usp_LocationUpdate", entity);
+            return _database.UpdateEntityAsync("usp_LocationUpdate", entity);
         }
 
-        public async Task InsertAsync(Location entity)
+        public async Task<Location> InsertAsync(Location entity)
         {
-            if (await GetAsync(entity.Id) != null)
-                await UpdateAsync(entity);
+            if (entity.Id != default && await GetAsync(entity.Id) != null)
+            {
+                return await UpdateAsync(entity);
+            }
 
-            await _database.CreateEntityAsync("usp_LocationInsert", entity);
+            return await _database.CreateEntityAsync("usp_LocationInsert", entity);
         }
 
         public async Task RemoveAsync(int key)

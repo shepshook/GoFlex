@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GoFlex.Web.ViewModels
+namespace GoFlex.ViewModels
 {
     public class EventPriceViewModel
     {

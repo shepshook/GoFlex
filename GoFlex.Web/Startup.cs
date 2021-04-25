@@ -1,8 +1,8 @@
 using System;
 using GoFlex.Core.Repositories.Abstractions;
 using GoFlex.Infrastructure;
-using GoFlex.Web.Services;
-using GoFlex.Web.Services.Abstractions;
+using GoFlex.Services;
+using GoFlex.Services.Abstractions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,7 +14,7 @@ using Serilog;
 using Serilog.Events;
 using Stripe;
 
-namespace GoFlex.Web
+namespace GoFlex
 {
     public class Startup
     {
@@ -37,6 +37,7 @@ namespace GoFlex.Web
                 });
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<Database>();
             services.AddScoped<IEventService, Services.EventService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IMailService, MailService>();

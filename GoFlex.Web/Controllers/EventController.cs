@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using GoFlex.Core.Entities;
-using GoFlex.Web.Services.Abstractions;
-using GoFlex.Web.ViewModels;
+using GoFlex.Services.Abstractions;
+using GoFlex.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GoFlex.Web.Controllers
+namespace GoFlex.Controllers
 {
     public class EventController : Controller
     {
@@ -17,7 +18,7 @@ namespace GoFlex.Web.Controllers
         }
 
         [Route("")]
-        public IActionResult List(int? category, string order, int page = 1)
+        public async Task<IActionResult> List(int? category, string order, int page = 1)
         {
             Expression<Func<Event, bool>> visibilityFilter = x => x.DateTime >= DateTime.Now;
             Enum.TryParse(typeof(EventListOrder), order, true, out var orderValue);
@@ -30,18 +31,18 @@ namespace GoFlex.Web.Controllers
                 Ordering = (EventListOrder?) orderValue
             };
 
-            var model = _eventService.GetPage(page, filter);
+            var model = await _eventService.GetPage(page, filter);
             
-            if (page < 1 || page > model.Page.Total)
+            if (page < 1 || page > model.Page.Total && model.Page.Total != 0)
                 return NotFound();
 
             return View(model);
         }
 
         [Route("[controller]/[action]/{id:int}")]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var item = _eventService.GetSingleEntity(id);
+            var item = await _eventService.GetSingleEntity(id);
             return View(item);
         }
     }

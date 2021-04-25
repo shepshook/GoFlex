@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using GoFlex.Web.Services.Abstractions;
-using GoFlex.Web.ViewModels;
+using GoFlex.Core.Entities;
+using GoFlex.Services.Abstractions;
+using GoFlex.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
-namespace GoFlex.Web.Controllers
+namespace GoFlex.Controllers
 {
     public class AuthController : Controller
     {
@@ -49,7 +50,7 @@ namespace GoFlex.Web.Controllers
             if (!ModelState.IsValid)
                 return View();
 
-            var user = _authService.GetUser(email);
+            var user = await _authService.GetUser(email);
             if (user == null || !_authService.VerifyPassword(user, password))
             {
                 _logger.Here().Information("Failed login attempt for {Email}", email);
@@ -58,8 +59,8 @@ namespace GoFlex.Web.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim("userId", user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.Role.Name)
+                new("userId", user.Id.ToString()),
+                new(ClaimTypes.Role, user.Role.ToString())
             };
 
             var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, "GoFlexType"));
@@ -81,8 +82,15 @@ namespace GoFlex.Web.Controllers
             return View(new SignUpViewModel());
         }
 
+        [HttpGet("[action]")]
+        public IActionResult SignUpOrganizer(string returnUrl)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            return View(new SignUpOrganizerViewModel());
+        }
+
         [HttpPost("[action]")]
-        public IActionResult SignUp(SignUpViewModel model, string returnUrl)
+        public async Task<IActionResult> SignUp(SignUpViewModel model, string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
 
@@ -113,9 +121,52 @@ namespace GoFlex.Web.Controllers
             if (!ModelState.IsValid)
                 return View("SignUp", model);
 
-            var roleName = model.IsOrganizer ? "Organizer" : "User";
+            if (await _authService.CreateCustomer(model.Email, model.Password))
+            {
+                _logger.Here().Information("New user created: {Email}", model.Email);
+                return Redirect(returnUrl);
+            }
 
-            if (_authService.CreateUser(model.Email, model.Password, roleName))
+            ModelState.AddModelError("email", "This email is already occupied");
+            return View(model);
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> SignUpOrganizer(SignUpOrganizerViewModel model, string returnUrl)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+
+            if (string.IsNullOrEmpty(model.Email))
+                ModelState.AddModelError("email", "Email cannot be empty");
+            else if (model.Email.Length < 4 || model.Email.Length > 128)
+                ModelState.AddModelError("email", "Email's length must be [4..128]");
+            else
+            {
+                try
+                {
+                    model.Email = new MailAddress(model.Email).Address;
+                }
+                catch (FormatException)
+                {
+                    ModelState.AddModelError("email", "Please provide a valid email");
+                }
+            }
+
+            if (string.IsNullOrEmpty(model.Password))
+                ModelState.AddModelError("password", "Password cannot be empty");
+            else if (model.Password.Length < 4 || model.Password.Length > 128)
+                ModelState.AddModelError("password", "Password's length must be [5..128]");
+
+            if (!string.Equals(model.Password, model.ConfirmPassword))
+                ModelState.AddModelError("password", "Passwords must match");
+
+            if (!ModelState.IsValid)
+                return View("SignUpOrganizer", model);
+
+            var organizer = new Organizer
+                {BankAccountNumber = model.BankAccountNumber, CompanyName = model.CompanyName};
+
+            if (await _authService.CreateOrganizer(organizer, model.Email, model.Password))
             {
                 _logger.Here().Information("New user created: {Email}", model.Email);
                 return Redirect(returnUrl);

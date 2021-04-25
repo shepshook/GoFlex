@@ -1,0 +1,39 @@
+﻿@model GoFlex.ViewModels.SignUpOrganizerViewModel
+
+@{
+    Layout = "_BaseLayout";
+}
+
+<div class="text-center">
+    <div class="card form-login shadow-lg">
+        <div class="card-title h3">Signing Up as Organizer</div>
+        <div class="card-body">
+            <form method="post" asp-action="SignUpOrganizer">
+                <div class="form-group mb-3">
+                    <input asp-for="Email" type="text" placeholder="Email" class="form-control"
+                           required autofocus minlength="4" maxlength="128" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <input asp-for="Password" id="inputPassword" type="password" placeholder="Password" class="form-control mb-2"
+                           required minlength="5" maxlength="128" />
+                    <input asp-for="ConfirmPassword" id="confirmPassword" type="password" placeholder="Confirm password" class="form-control"
+                           required minlength="5" maxlength="128" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <input asp-for="CompanyName" type="text" placeholder="Company Name" class="form-control"
+                           required minlength="2" maxlength="128" />
+                    <span asp-validation-for="CompanyName" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <input asp-for="BankAccountNumber" type="text" placeholder="Bank Account Number" class="form-control"
+                           required minlength="2" maxlength="128" />
+                    <span asp-validation-for="BankAccountNumber" class="text-danger"></span>
+                </div>
+                <input type="submit" value="Sign Up" class="btn btn-primary" />
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+            </form>
+        </div>
+    </div>
+</div>

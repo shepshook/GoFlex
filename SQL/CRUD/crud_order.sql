@@ -7,16 +7,33 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_OrderSelect] 
-    @OrderId int
+    @Id int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
 
 	BEGIN TRAN
 
-	SELECT [OrderId], [UserId], [EventId], [Timestamp] 
+	SELECT [OrderId] as Id, [UserId], [EventId], [Timestamp] 
 	FROM   [dbo].[Order] 
-	WHERE  ([OrderId] = @OrderId OR @OrderId IS NULL) 
+	WHERE  ([OrderId] = @Id OR @Id IS NULL) 
+
+	COMMIT
+GO
+IF OBJECT_ID('[dbo].[usp_OrderSelectList]') IS NOT NULL
+BEGIN 
+    DROP PROC [dbo].[usp_OrderSelectList] 
+END 
+GO
+CREATE PROC [dbo].[usp_OrderSelectList] 
+AS 
+	SET NOCOUNT ON 
+	SET XACT_ABORT ON  
+
+	BEGIN TRAN
+
+	SELECT [OrderId] as Id, [UserId], [EventId], [Timestamp] 
+	FROM   [dbo].[Order]  
 
 	COMMIT
 GO
@@ -38,7 +55,7 @@ AS
 	INSERT INTO [dbo].[Order] ([UserId], [EventId], [Timestamp])
 	SELECT @UserId, @EventId, @Timestamp
 	
-	SELECT [OrderId], [UserId], [EventId], [Timestamp]
+	SELECT [OrderId] as Id, [UserId], [EventId], [Timestamp]
 	FROM   [dbo].[Order]
 	WHERE  [OrderId] = SCOPE_IDENTITY()
 	
@@ -51,7 +68,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_OrderUpdate] 
-    @OrderId int,
+    @Id int,
     @UserId uniqueidentifier,
     @EventId int,
     @Timestamp datetime
@@ -63,12 +80,12 @@ AS
 
 	UPDATE [dbo].[Order]
 	SET    [UserId] = @UserId, [EventId] = @EventId, [Timestamp] = @Timestamp
-	WHERE  [OrderId] = @OrderId
+	WHERE  [OrderId] = @Id
 	
 
-	SELECT [OrderId], [UserId], [EventId], [Timestamp]
+	SELECT [OrderId] as Id, [UserId], [EventId], [Timestamp]
 	FROM   [dbo].[Order]
-	WHERE  [OrderId] = @OrderId	
+	WHERE  [OrderId] = @Id	
 	
 
 	COMMIT
@@ -79,7 +96,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_OrderDelete] 
-    @OrderId int
+    @Id int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -88,7 +105,7 @@ AS
 
 	DELETE
 	FROM   [dbo].[Order]
-	WHERE  [OrderId] = @OrderId
+	WHERE  [OrderId] = @Id
 
 	COMMIT
 GO

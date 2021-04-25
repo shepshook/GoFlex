@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GoFlex.Web.ViewModels
+namespace GoFlex.ViewModels
 {
     public class PageViewModel
     {

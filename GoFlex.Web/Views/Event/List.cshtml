@@ -1,5 +1,5 @@
-﻿@using GoFlex.Web.ViewModels
-@model GoFlex.Web.ViewModels.EventListViewModel
+﻿@using GoFlex.ViewModels
+@model GoFlex.ViewModels.EventListViewModel
 @addTagHelper *, GoFlex
 
 @{
@@ -11,15 +11,15 @@
     }
     var orderings = new List<SelectListItem>
     {
-        new SelectListItem("Event date", EventListOrder.Date.ToString()),
-        new SelectListItem("Create date", EventListOrder.CreateDate.ToString())
+        new("Event date", EventListOrder.Date.ToString()),
+        new("Create date", EventListOrder.CreateDate.ToString())
     };
 
     if (!Model.Page.Parameters.ContainsKey("category"))
     {
         Model.Page.Parameters.Add("category", "all");
     }
-    var categories = new List<SelectListItem> { new SelectListItem("All categories", "All") };
+    var categories = new List<SelectListItem> { new("All categories", "All") };
     categories.AddRange(Model.EventCategories.Select(x => new SelectListItem(x.Name, x.Id.ToString())));
 }
 
@@ -39,7 +39,7 @@
         <div class="card-deck">
             @foreach (var _event in Model.Events)
             {
-                var cardBackground = _event.IsNew ? "background-color: #fffde3" : ""; 
+                var cardBackground = _event.IsNew() ? "background-color: #fffde3" : ""; 
                 <div class="col-lg-3 col-md-6">
                     <div class="card mx-0 mb-4" style="@cardBackground">
                         <div class="card-header">
@@ -49,7 +49,7 @@
                             <img class="w-100 h-auto" src="@_event.Photo" alt="" />
                         </a>
                         <p class="card-body pb-1 mb-0" style="max-height: 100px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">@_event.Description</p>
-                        <div class="d-flex flex-row justify-content-end text-muted small p-2">on @_event.ShortDate</div>
+                        <div class="d-flex flex-row justify-content-end text-muted small p-2">on @_event.ShortDate()</div>
                     </div>
                 </div>
             }

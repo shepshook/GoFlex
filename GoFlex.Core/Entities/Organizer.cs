@@ -1,7 +1,6 @@
 using System;
-using GoFlex.Core.Entities;
 
-namespace GoFlex.Core
+namespace GoFlex.Core.Entities
 {
     public class Organizer : Entity<Guid>
     {

@@ -7,16 +7,16 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_UserSelect] 
-    @UserId uniqueidentifier
+    @Id uniqueidentifier
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
 
 	BEGIN TRAN
 
-	SELECT [UserId], [Email], [PasswordHash], [PasswordSalt], [Role] 
+	SELECT [UserId] as Id, [Email], [PasswordHash], [PasswordSalt], [Role] 
 	FROM   [dbo].[User] 
-	WHERE  ([UserId] = @UserId OR @UserId IS NULL) 
+	WHERE  ([UserId] = @Id OR @Id IS NULL) 
 
 	COMMIT
 GO
@@ -26,7 +26,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_UserInsert] 
-    @UserId uniqueidentifier,
+    @Id uniqueidentifier,
     @Email varchar(100),
     @PasswordHash nvarchar(128),
     @PasswordSalt nvarchar(128),
@@ -38,14 +38,31 @@ AS
 	BEGIN TRAN
 	
 	INSERT INTO [dbo].[User] ([UserId], [Email], [PasswordHash], [PasswordSalt], [Role])
-	SELECT @UserId, @Email, @PasswordHash, @PasswordSalt, @Role
+	SELECT @Id, @Email, @PasswordHash, @PasswordSalt, @Role
 	
 
-	SELECT [UserId], [Email], [PasswordHash], [PasswordSalt], [Role]
+	SELECT [UserId] as Id, [Email], [PasswordHash], [PasswordSalt], [Role]
 	FROM   [dbo].[User]
-	WHERE  [UserId] = @UserId
+	WHERE  [UserId] = @Id
 	
                
+	COMMIT
+GO
+IF OBJECT_ID('[dbo].[usp_UserSelectList]') IS NOT NULL
+BEGIN 
+    DROP PROC [dbo].[usp_UserSelectList] 
+END 
+GO
+CREATE PROC [dbo].[usp_UserSelectList] 
+AS 
+	SET NOCOUNT ON 
+	SET XACT_ABORT ON  
+
+	BEGIN TRAN
+
+	SELECT [UserId] as Id, [Email], [PasswordHash], [PasswordSalt], [Role]
+	FROM   [dbo].[User] 
+
 	COMMIT
 GO
 IF OBJECT_ID('[dbo].[usp_UserUpdate]') IS NOT NULL
@@ -54,7 +71,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_UserUpdate] 
-    @UserId uniqueidentifier,
+    @Id uniqueidentifier,
     @Email varchar(100),
     @PasswordHash nvarchar(128),
     @PasswordSalt nvarchar(128),
@@ -67,12 +84,12 @@ AS
 
 	UPDATE [dbo].[User]
 	SET    [Email] = @Email, [PasswordHash] = @PasswordHash, [PasswordSalt] = @PasswordSalt, [Role] = @Role
-	WHERE  [UserId] = @UserId
+	WHERE  [UserId] = @Id
 	
 	
-	SELECT [UserId], [Email], [PasswordHash], [PasswordSalt], [Role]
+	SELECT [UserId] as Id, [Email], [PasswordHash], [PasswordSalt], [Role]
 	FROM   [dbo].[User]
-	WHERE  [UserId] = @UserId	
+	WHERE  [UserId] = @Id	
 
 
 	COMMIT
@@ -83,7 +100,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_UserDelete] 
-    @UserId uniqueidentifier
+    @Id uniqueidentifier
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -92,7 +109,7 @@ AS
 
 	DELETE
 	FROM   [dbo].[User]
-	WHERE  [UserId] = @UserId
+	WHERE  [UserId] = @Id
 
 	COMMIT
 GO

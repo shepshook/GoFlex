@@ -7,8 +7,8 @@ namespace GoFlex.Core.Repositories.Abstractions
     {
         Task<TEntity> GetAsync(TKey key);
         Task<IEnumerable<TEntity>> GetAllAsync(IDictionary<string, object> parameters = null);
-        Task UpdateAsync(TEntity entity);
-        Task InsertAsync(TEntity entity);
+        Task<TEntity> UpdateAsync(TEntity entity);
+        Task<TEntity> InsertAsync(TEntity entity);
         Task RemoveAsync(TKey key);
     }
 }

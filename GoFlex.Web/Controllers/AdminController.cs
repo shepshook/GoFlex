@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using GoFlex.Core.Entities;
-using GoFlex.Web.Services.Abstractions;
-using GoFlex.Web.ViewModels;
+using GoFlex.Services.Abstractions;
+using GoFlex.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GoFlex.Web.Controllers
+namespace GoFlex.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
@@ -20,7 +21,7 @@ namespace GoFlex.Web.Controllers
         }
 
         [Route("[controller]/[action]")]
-        public IActionResult Events()
+        public async Task<IActionResult> Events()
         {
             Expression<Func<Event, bool>> waitingFilter = x => x.IsApproved == null;
             var filter = new EventListFilter
@@ -28,14 +29,14 @@ namespace GoFlex.Web.Controllers
                 AdditionalFilters = new [] {waitingFilter},
                 Ordering = EventListOrder.CreateDate
             };
-            var list = _eventService.GetList(filter);
+            var list = await _eventService.GetList(filter);
             return View(list);
         }
 
         [HttpPost("[controller]/[action]")]
-        public IActionResult Vote(int id, bool vote)
+        public async Task<IActionResult> Vote(int id, bool vote)
         {
-            var result = _eventService.AcceptEvent(id, vote);
+            var result = await _eventService.AcceptEvent(id, vote);
             if (!result)
                 return NotFound();
 

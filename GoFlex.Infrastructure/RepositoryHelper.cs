@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace GoFlex.Infrastructure
 {
@@ -34,8 +35,23 @@ namespace GoFlex.Infrastructure
         internal static IDictionary<string, object> ToDictionary(this object entity)
         {
             return entity?.GetType().GetProperties()
-                .Where(prop => prop.GetType().IsValueType || prop.GetType() == typeof(string))
+                .Where(prop => (
+                    prop.PropertyType.IsValueType 
+                    || prop.PropertyType == typeof(string)) 
+                    && !(prop.Name == "Id" 
+                        && prop.GetValue(entity).IsDefault())
+                    && !prop.PropertyType.IsAssignableTo(typeof(ITuple)))
                 .ToDictionary(prop => prop.Name, prop => prop.GetValue(entity));
+        }
+
+        private static bool IsDefault(this object value)
+        {
+            return value switch
+            {
+                int x => x == 0,
+                Guid guid => guid == Guid.Empty,
+                _ => false
+            };
         }
     }
 }

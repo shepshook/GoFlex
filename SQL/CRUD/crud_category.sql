@@ -7,16 +7,33 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_CategorySelect] 
-    @CategoryId int
+    @Id int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
 
 	BEGIN TRAN
 
-	SELECT [CategoryId], [Name] 
+	SELECT [CategoryId] as Id, [Name] 
 	FROM   [dbo].[Category] 
-	WHERE  ([CategoryId] = @CategoryId OR @CategoryId IS NULL) 
+	WHERE  ([CategoryId] = @Id OR @Id IS NULL) 
+
+	COMMIT
+GO
+IF OBJECT_ID('[dbo].[usp_CategorySelectList]') IS NOT NULL
+BEGIN 
+    DROP PROC [dbo].[usp_CategorySelectList] 
+END 
+GO
+CREATE PROC [dbo].[usp_CategorySelectList] 
+AS 
+	SET NOCOUNT ON 
+	SET XACT_ABORT ON  
+
+	BEGIN TRAN
+
+	SELECT [CategoryId] as Id, [Name] 
+	FROM   [dbo].[Category] 
 
 	COMMIT
 GO
@@ -37,7 +54,7 @@ AS
 	SELECT @Name
 	
 
-	SELECT [CategoryId], [Name]
+	SELECT [CategoryId] as Id, [Name]
 	FROM   [dbo].[Category]
 	WHERE  [CategoryId] = SCOPE_IDENTITY()
 
@@ -50,7 +67,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_CategoryUpdate] 
-    @CategoryId int,
+    @Id int,
     @Name nvarchar(32) = NULL
 AS 
 	SET NOCOUNT ON 
@@ -60,12 +77,12 @@ AS
 
 	UPDATE [dbo].[Category]
 	SET    [Name] = @Name
-	WHERE  [CategoryId] = @CategoryId
+	WHERE  [CategoryId] = @Id
 	
 
-	SELECT [CategoryId], [Name]
+	SELECT [CategoryId] as Id, [Name]
 	FROM   [dbo].[Category]
-	WHERE  [CategoryId] = @CategoryId	
+	WHERE  [CategoryId] = @Id	
 
 
 	COMMIT
@@ -76,7 +93,7 @@ BEGIN
 END 
 GO
 CREATE PROC [dbo].[usp_CategoryDelete] 
-    @CategoryId int
+    @Id int
 AS 
 	SET NOCOUNT ON 
 	SET XACT_ABORT ON  
@@ -85,7 +102,7 @@ AS
 
 	DELETE
 	FROM   [dbo].[Category]
-	WHERE  [CategoryId] = @CategoryId
+	WHERE  [CategoryId] = @Id
 
 	COMMIT
 GO

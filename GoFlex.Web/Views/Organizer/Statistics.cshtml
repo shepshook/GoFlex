@@ -27,14 +27,14 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach (var price in item.Prices.OrderBy(x => x.Price))
+                        @foreach (var price in item.Tickets.OrderBy(x => x.Price))
                         {
                             var removedClass = price.IsRemoved ? "text-muted" : "";
                             <tr class="@removedClass">
                                 <td>@price.Name</td>
-                                <td>@price.FormattedPrice</td>
-                                <td>@price.Sold</td>
-                                <td>@($"{price.Sold * price.Price :N} BYN")</td>
+                                <td>@price.FormattedPrice()</td>
+                                <td>@price.Sold()</td>
+                                <td>@($"{price.Sold() * price.Price :N} BYN")</td>
                             </tr>
                         }
                         </tbody>

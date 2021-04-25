@@ -3,22 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories.Abstractions;
-using GoFlex.Web.Services.Abstractions;
-using MailKit.Net.Smtp;
+using GoFlex.Services.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using MimeKit;
-using MimeKit.Utils;
-using QRCoder;
 using Serilog;
 using Stripe;
 using Stripe.Checkout;
-using ContentType = System.Net.Mime.ContentType;
 
-namespace GoFlex.Web.Areas.Api
+namespace GoFlex.Areas.Api
 {
     [Area("Api")]
     [ApiController]
@@ -41,12 +35,12 @@ namespace GoFlex.Web.Areas.Api
 
         [Authorize]
         [HttpPost("[area]/[controller]/[action]/{id:int}")]
-        public ActionResult Create(int id, string returnUrl = null)
+        public async Task<ActionResult> Create(int id, string returnUrl = null)
         {
             var host = Request.Scheme + Uri.SchemeDelimiter + Request.Host;
 
-            var order = _unitOfWork.OrderRepository.Get(id);
-            var user = _unitOfWork.UserRepository.Get(Guid.Parse(User.FindFirst("userId").Value));
+            var order = await _unitOfWork.OrderRepository.GetAsync(id);
+            var user = await _unitOfWork.UserRepository.GetAsync(Guid.Parse(User.FindFirst("userId").Value));
 
             if (order == null || user.Id != order.UserId)
                 return NotFound();
@@ -62,11 +56,11 @@ namespace GoFlex.Web.Areas.Api
                 {
                     PriceData = new SessionLineItemPriceDataOptions
                     {
-                        UnitAmount = decimal.ToInt64(item.EventPrice.Price * 100),
+                        UnitAmount = decimal.ToInt64(item.Ticket.Price * 100),
                         Currency = "usd",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
-                            Name = $"{order.Event.Name}: {item.EventPrice.Name}"
+                            Name = $"{order.Event.Name}: {item.Ticket.Name}"
                         }
                     },
                     Quantity = item.Quantity
@@ -107,17 +101,17 @@ namespace GoFlex.Web.Areas.Api
                     case Events.CheckoutSessionCompleted:
                         session = ExpandAsSession(stripeEvent);
                         if (session.PaymentStatus == "paid")
-                            CompleteOrder(session);
+                            await CompleteOrder(session);
                         break;
 
                     case Events.CheckoutSessionAsyncPaymentSucceeded:
                         session = ExpandAsSession(stripeEvent);
-                        CompleteOrder(session);
+                        await CompleteOrder(session);
                         break;
 
                     case Events.CheckoutSessionAsyncPaymentFailed:
                         session = ExpandAsSession(stripeEvent);
-                        NotifyCustomer(session);
+                        await NotifyCustomer(session);
                         break;
 
                     default:
@@ -145,41 +139,41 @@ namespace GoFlex.Web.Areas.Api
             return service.Get(session.Id, options);
         }
 
-        private void CompleteOrder(Session session)
+        private async Task CompleteOrder(Session session)
         {
             var id = int.Parse(session.Metadata["OrderId"]);
-            var order = _unitOfWork.OrderRepository.Get(id);
+            var order = await _unitOfWork.OrderRepository.GetAsync(id);
             var emailReceiver = order.User.Email;
 
             _logger.Here().Information("Payment for order {Id} received from {Email}", order.Id, emailReceiver);
 
-            foreach (var item in order.Items)
-            {
-                foreach (var _ in Enumerable.Range(0, item.Quantity))
-                {
-                    var secret = new OrderItemSecret
-                    {
-                        OrderItemId = item.Id,
-                        Id = Guid.NewGuid(),
-                        IsUsed = false
-                    };
-                    _unitOfWork.OrderItemSecretRepository.Insert(secret);
-                }
-            }
-            _unitOfWork.Commit();
+            //foreach (var item in order.Items)
+            //{
+            //    foreach (var _ in Enumerable.Range(0, item.Quantity))
+            //    {
+            //        var secret = new OrderItemSecret
+            //        {
+            //            OrderItemId = item.Id,
+            //            Id = Guid.NewGuid(),
+            //            IsUsed = false
+            //        };
+            //        _unitOfWork.OrderItemSecretRepository.Insert(secret);
+            //    }
+            //}
+            //_unitOfWork.Commit();
 
             var path = Request.Scheme + "://" + Request.Host.ToUriComponent();
-            order = _unitOfWork.OrderRepository.Get(id);
+            order = await _unitOfWork.OrderRepository.GetAsync(id);
 
             _mailService.SendOrder(order, path, Url);
         }
 
-        private void NotifyCustomer(Session session)
+        private async Task NotifyCustomer(Session session)
         {
             //todo: notify customer about failed payment by email
 
             var id = int.Parse(session.Metadata["OrderId"]);
-            var order = _unitOfWork.OrderRepository.Get(id);
+            var order = await _unitOfWork.OrderRepository.GetAsync(id);
             var email = session.Customer.Email;
 
             _logger.Here().Warning("Payment for order {@Order} failed for {Email}", order, email);

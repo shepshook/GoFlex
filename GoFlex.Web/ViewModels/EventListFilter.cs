@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using GoFlex.Core.Entities;
 
-namespace GoFlex.Web.ViewModels
+namespace GoFlex.ViewModels
 {
     public class EventListFilter
     {
@@ -34,7 +34,7 @@ namespace GoFlex.Web.ViewModels
             var filters = new List<Expression<Func<Event, bool>>>();
 
             if (CategoryId.HasValue)
-                filters.Add(x => x.EventCategoryId == CategoryId);
+                filters.Add(x => x.CategoryId == CategoryId);
 
             if (OnlyActive.HasValue && OnlyActive.Value)
                 filters.Add(x => x.DateTime > DateTime.Now);
@@ -68,6 +68,17 @@ namespace GoFlex.Web.ViewModels
                 result.Add("onlyApproved", OnlyApproved.Value);
 
             return result;
+        }
+
+        public IList<Event> ApplyTo(IEnumerable<Event> events)
+        {
+            events = BuildFilters().Aggregate(events, (current, filter) => current.Where(filter.Compile()));
+
+            events = IsDescending
+                ? events.OrderByDescending(OrderKeySelector.Compile())
+                : events.OrderBy(OrderKeySelector.Compile());
+
+            return events.ToList();
         }
     }
 }

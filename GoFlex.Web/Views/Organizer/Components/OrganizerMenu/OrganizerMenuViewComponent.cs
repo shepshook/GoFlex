@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace GoFlex.Web.Components
+namespace GoFlex.Views.Organizer.Components.OrganizerMenu
 {
     public class OrganizerMenuViewComponent : ViewComponent
     {

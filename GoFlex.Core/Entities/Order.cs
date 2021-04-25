@@ -14,7 +14,7 @@ namespace GoFlex.Core.Entities
         public virtual Event Event { get; set; }
         public virtual ICollection<OrderItem> Items { get; set; }
 
-        public decimal TotalPrice => Items.Sum(x => x.Ticket.Price * x.Quantity);
-        public string TotalPriceFormatted => $"{TotalPrice:N} BYN";
+        public decimal TotalPrice() => Items?.Sum(x => x.Ticket.Price * x.Quantity) ?? 0;
+        public string TotalPriceFormatted() => $"{TotalPrice():N} BYN";
     }
 }

@@ -1,5 +1,5 @@
-﻿@using GoFlex.Web.ViewModels
-@model GoFlex.Web.ViewModels.EventListViewModel
+﻿@using GoFlex.ViewModels
+@model GoFlex.ViewModels.EventListViewModel
 @addTagHelper *, GoFlex.Web
 
 @{
@@ -11,15 +11,15 @@
     }
     var orderings = new List<SelectListItem>
 {
-        new SelectListItem("Event date", EventListOrder.Date.ToString()),
-        new SelectListItem("Create date", EventListOrder.CreateDate.ToString())
+        new("Event date", EventListOrder.Date.ToString()),
+        new("Create date", EventListOrder.CreateDate.ToString())
     };
 
     if (!Model.Page.Parameters.ContainsKey("category"))
     {
         Model.Page.Parameters.Add("category", null);
     }
-    var categories = new List<SelectListItem> { new SelectListItem("All categories", "All") };
+    var categories = new List<SelectListItem> { new("All categories", "All") };
     categories.AddRange(Model.EventCategories.Select(x => new SelectListItem(x.Name, x.Id.ToString())));
 
     if (!Model.Page.Parameters.ContainsKey("onlyActive"))
@@ -74,10 +74,10 @@
                 <form method="get" style="width: 40%" class="mr-4" asp-action="EditEvent" asp-controller="Organizer" asp-route-id="@_event.Id">
                     <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString"/>
                     <h4 class="mb-2" asp-action="EditEvent">@_event.Name</h4>
-                    <span class="text-muted small">@_event.EventCategory.Name</span>
+                    <span class="text-muted small">@_event.Category.Name</span>
                 </form>
                 <div>
-                    <p class="mb-1">On @_event.ShortDate</p>
+                    <p class="mb-1">On @_event.ShortDate()</p>
                     <span>At @_event.Location.Name</span>
                 </div>
                 <div class="ml-auto" style="color: @iconColor">

@@ -15,25 +15,35 @@ namespace GoFlex.Infrastructure.Repositories
         public async Task<Order> GetAsync(int key)
         {
             var entity = await _database.ReadEntityAsync<Order>("usp_OrderSelect", key);
-            return (await MakeInclusionsAsync(new[] { entity })).Single();
+            return entity == null ? null : (await MakeInclusionsAsync(new[] { entity })).Single();
         }
 
         public Task<IEnumerable<Order>> GetAllAsync(IDictionary<string, object> parameters = null)
         {
-            return _database.ReadEntitiesAsync<Order>("", parameters);
+            return _database.ReadEntitiesAsync<Order>("usp_OrderSelectList", parameters);
         }
 
-        public async Task UpdateAsync(Order entity)
+        public Task<Order> UpdateAsync(Order entity)
         {
-            await _database.UpdateEntityAsync("usp_OrderUpdate", entity);
+            return _database.UpdateEntityAsync("usp_OrderUpdate", entity);
         }
 
-        public async Task InsertAsync(Order entity)
+        public async Task<Order> InsertAsync(Order entity)
         {
-            if (await GetAsync(entity.Id) != null)
-                await UpdateAsync(entity);
+            if (entity.Id != default && await GetAsync(entity.Id) != null)
+            {
+                return await UpdateAsync(entity);
+            }
 
-            await _database.CreateEntityAsync("usp_OrderInsert", entity);
+            var insertedEntity = await _database.CreateEntityAsync("usp_OrderInsert", entity);
+
+            foreach (var item in entity.Items)
+            {
+                item.OrderId = insertedEntity.Id;
+                await _unitOfWork.OrderItemRepository.InsertAsync(item);
+            }
+
+            return insertedEntity;
         }
 
         public async Task RemoveAsync(int key)
@@ -47,7 +57,7 @@ namespace GoFlex.Infrastructure.Repositories
             {
                 order.User = await _unitOfWork.UserRepository.GetAsync(order.UserId);
                 order.Event = await _unitOfWork.EventRepository.GetAsync(order.EventId);
-                order.Items = await _unitOfWork.OrderItemRepository.GetAllAsync(new Dictionary<string, object> { { "OrderID", order.Id } });
+                order.Items = (await _unitOfWork.OrderItemRepository.GetAllAsync()).Where(x => x.OrderId == order.Id).ToList();
             }
 
             return entities;

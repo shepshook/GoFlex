@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using GoFlex.Core.Entities;
 using GoFlex.Core.Repositories.Abstractions;
-using GoFlex.Web.Services.Abstractions;
+using GoFlex.Services.Abstractions;
 
-namespace GoFlex.Web.Services
+namespace GoFlex.Services
 {
     public class AuthService : IAuthService
     {
@@ -17,32 +17,37 @@ namespace GoFlex.Web.Services
             _unitOfWork = unitOfWork;
         }
 
-        public User GetUser(string search)
+        public async Task<User> GetUser(string search)
         {
-            return _unitOfWork.UserRepository.All(x => x.Email == search).SingleOrDefault();
+            return await _unitOfWork.UserRepository.GetByEmailAsync(search);
         }
 
-        public bool CreateUser(string email, string password, string roleName)
+        public async Task<bool> CreateCustomer(string email, string password)
         {
-            var salt = GenerateSalt();
-            var hash = ComputeHash(password + salt);
-            var role = _unitOfWork.RoleRepository.All(x =>
-                string.Equals(x.Name, roleName)).First();
-
-            var user = new User
-            {
-                Email = email.ToLower(),
-                PasswordHash = hash,
-                PasswordSalt = salt,
-                RoleId = role.Id
-            };
+            var user = GetUser(email, password, Role.Customer);
 
             try
             {
-                _unitOfWork.UserRepository.Insert(user);
-                _unitOfWork.Commit();
+                await _unitOfWork.UserRepository.InsertAsync(user);
             }
-            catch (Exception e)
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> CreateOrganizer(Organizer organizer, string email, string password)
+        {
+            var user = GetUser(email, password, Role.Organizer);
+            organizer.User = user;
+
+            try
+            {
+                await _unitOfWork.OrganizerRepository.InsertAsync(organizer);
+            }
+            catch (Exception)
             {
                 return false;
             }
@@ -55,9 +60,9 @@ namespace GoFlex.Web.Services
             return user.PasswordHash == ComputeHash(password + user.PasswordSalt);
         }
 
-        public bool UpdatePassword(Guid userId, string oldPassword, string newPassword)
+        public async Task<bool> UpdatePassword(Guid userId, string oldPassword, string newPassword)
         {
-            var user = _unitOfWork.UserRepository.Get(userId);
+            var user = await _unitOfWork.UserRepository.GetAsync(userId);
             if (!VerifyPassword(user, oldPassword))
                 return false;
 
@@ -65,8 +70,24 @@ namespace GoFlex.Web.Services
             user.PasswordHash = ComputeHash(newPassword + salt);
             user.PasswordSalt = salt;
 
-            _unitOfWork.Commit();
+            await _unitOfWork.UserRepository.UpdateAsync(user);
             return true;
+        }
+
+        private User GetUser(string email, string password, Role role)
+        {
+            var salt = GenerateSalt();
+            var hash = ComputeHash(password + salt);
+
+            var user = new User
+            {
+                Email = email.ToLower(),
+                PasswordHash = hash,
+                PasswordSalt = salt,
+                Role = role
+            };
+
+            return user;
         }
 
         private string ComputeHash(string text)

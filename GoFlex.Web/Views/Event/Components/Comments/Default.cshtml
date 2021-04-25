@@ -1,0 +1,16 @@
+@model IList<Comment>
+
+@if (Model != null && Model.Any())
+{
+    foreach (var comment in Model)
+    {
+        <div class="jumbotron p-3 mb-2">@comment.Text</div>
+        <form class="comment d-flex justify-content-between w-50 py-2 mb-3" method="post" asp-controller="Comment" asp-action="PostComment">
+            <input type="hidden" name="EventId" value="@comment.EventId" />
+            <input type="hidden" name="ParentId" value="@comment.Id" />
+            <textarea rows="1" class="form-control w-100 mr-3" name="Text" placeholder="Reply to comment..."></textarea>
+            <button type="submit" class="btn btn-success">Send</button>
+        </form>
+        <div class="ml-5">@await Component.InvokeAsync("Comments", new { parentId = comment.Id })</div>
+    }
+}
