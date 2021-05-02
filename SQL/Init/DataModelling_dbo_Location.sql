@@ -1,0 +1,3 @@
+INSERT INTO DataModelling.dbo.Location (Name, Address, PhoneNumber, Photo) VALUES (N'New York', N'USA, Rokossovskogo st. 13', N'112345', null);
+INSERT INTO DataModelling.dbo.Location (Name, Address, PhoneNumber, Photo) VALUES (N'Amsterdam', N'Netherlands, Wall st. 123', N'993356', null);
+INSERT INTO DataModelling.dbo.Location (Name, Address, PhoneNumber, Photo) VALUES (N'Minsk', N'Belarus, Pushkina st. Kolotushkina building', N'82379548', null);

@@ -1,0 +1,9 @@
+INSERT INTO DataModelling.dbo.Order_Ticket (OrderId, TicketId, Quantity) VALUES (9, 2, 2);
+INSERT INTO DataModelling.dbo.Order_Ticket (OrderId, TicketId, Quantity) VALUES (11, 2, 2);
+INSERT INTO DataModelling.dbo.Order_Ticket (OrderId, TicketId, Quantity) VALUES (12, 2, 2);
+INSERT INTO DataModelling.dbo.Order_Ticket (OrderId, TicketId, Quantity) VALUES (13, 2, 2);
+INSERT INTO DataModelling.dbo.Order_Ticket (OrderId, TicketId, Quantity) VALUES (14, 2, 1);
+INSERT INTO DataModelling.dbo.Order_Ticket (OrderId, TicketId, Quantity) VALUES (14, 3, 4);
+INSERT INTO DataModelling.dbo.Order_Ticket (OrderId, TicketId, Quantity) VALUES (15, 3, 2);
+INSERT INTO DataModelling.dbo.Order_Ticket (OrderId, TicketId, Quantity) VALUES (16, 2, 3);
+INSERT INTO DataModelling.dbo.Order_Ticket (OrderId, TicketId, Quantity) VALUES (16, 3, 5);

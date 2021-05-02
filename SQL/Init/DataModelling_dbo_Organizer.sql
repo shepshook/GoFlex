@@ -1,0 +1,5 @@
+INSERT INTO DataModelling.dbo.Organizer (UserId, CompanyName, BankAccountNumber) VALUES (N'A42A40A3-0604-405D-AC00-1D7750F18958', N'Some company name', N'1422-8322');
+INSERT INTO DataModelling.dbo.Organizer (UserId, CompanyName, BankAccountNumber) VALUES (N'63332575-DB6C-4C7B-B5D1-3EA9057AF819', N'Company name', N'1234-5678');
+INSERT INTO DataModelling.dbo.Organizer (UserId, CompanyName, BankAccountNumber) VALUES (N'DA980B4C-E74B-4CDE-A0DE-8F844AA15CAE', N'Default Company', N'Default IBAN');
+INSERT INTO DataModelling.dbo.Organizer (UserId, CompanyName, BankAccountNumber) VALUES (N'4F905ECD-29FC-496D-870D-B67111FB648C', N'Some other company, Inc.', N'342-SDF-213');
+INSERT INTO DataModelling.dbo.Organizer (UserId, CompanyName, BankAccountNumber) VALUES (N'766CE7BE-2654-4240-8C20-DC3F9348C69F', N'My new company', N'12345-QWERTY');
