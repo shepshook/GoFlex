@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoFlex", "GoFlex.Web\GoFlex.csproj", "{BA99F259-EB76-45FF-9598-E5D171D59B7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoFlex", "GoFlex.Web\GoFlex.Web.csproj", "{BA99F259-EB76-45FF-9598-E5D171D59B7B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoFlex.Core", "GoFlex.Core\GoFlex.Core.csproj", "{00786762-2C89-442B-AA1E-4BF01D690327}"
 EndProject

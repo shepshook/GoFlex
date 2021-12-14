@@ -10,7 +10,7 @@
     </div>
     <div class="col-md-10">
         <h2>Add new event</h2>
-        <form method="post" asp-controller="Event" asp-action="Add" class="col-md-6">
+        <form method="post" asp-controller="Organizer" asp-action="SaveEvent" class="col-md-6">
             <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
             <div class="form-group">
                 <label asp-for="Name"></label>
